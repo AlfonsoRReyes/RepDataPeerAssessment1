@@ -1,4 +1,12 @@
-# README
+---
+title: "README"
+output:
+  html_document: 
+    highlight: tango
+    keep_md: yes
+    theme: united
+  html_notebook: default
+---
 
 ## Development of Assignment
 
