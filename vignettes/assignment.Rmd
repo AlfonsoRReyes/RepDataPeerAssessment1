@@ -18,10 +18,27 @@ vignette: >
 
 
 ## Loading and preprocessing the data
+We start by downloading the raw data using the link provided by the instructor. We use a function that will download the zip file, unpack it and place it in an indicated directory. The function is called `downloadZip`.
+
+
+
 
 ```{r}
-
+downloadZip <- function(fileUrl, outDir="./data") {
+  temp <- tempfile()
+  download.file(fileUrl, temp, mode = "wb")
+  unzip(temp, exdir = outDir)
+}
 ```
+
+
+```{r}
+fileUrl <- "https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2Factivity.zip"
+outDir <- "../inst/extdata"             # folder for raw data
+downloadZip(fileUrl, outDir = outDir)   # download and unpack zip file
+```
+
+
 
 
 ## What is mean total number of steps taken per day?
