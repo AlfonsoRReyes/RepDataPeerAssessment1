@@ -6,7 +6,7 @@
 
 #' A hello world function
 #'
-#' It just ays "hello
+#' It just says "hello
 #'
 #'
 #' @return Nothing
