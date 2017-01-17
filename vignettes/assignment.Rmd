@@ -16,12 +16,16 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
+```{r setup, include=FALSE, error=TRUE, message=FALSE}
+knitr::opts_chunk$set(echo = TRUE, comment = NA, error = TRUE)
+```
+
 
 ## Loading and preprocessing the data
 We start by downloading the raw data using the link provided by the instructor. We use a function that will download the zip file, unpack it and place it in an indicated directory. The function is called `downloadZip`.
 
 
-
+### Downloading and unpacking raw data file
 
 ```{r}
 downloadZip <- function(fileUrl, outDir="./data") {
@@ -39,9 +43,64 @@ downloadZip(fileUrl, outDir = outDir)   # download and unpack zip file
 ```
 
 
+### Create the RData file
+More RData file may be generated during this assignment. They will be placed under the folder `data`.
+
+```{r}
+# get the base folder and raw data folder
+baseLoc <- system.file(package="RepDataPeerAssessment1")
+extPath <- file.path(baseLoc, "extdata")
+baseLoc
+extPath
+```
+
+```{r}
+# save the 
+activity <- read.csv(paste(extPath, "activity.csv", sep = "/"))
+save(activity, file="../data/activity.RData")
+
+```
+
+
+```{r}
+# this will work after at least a data file has been saved to this folder
+system.file(file="data", package="RepDataPeerAssessment1")
+```
+
+### Basic sanity check
+
+* Show first 6 rows of data frame
+* Show dimensions of the data frame
+* Show variable names
+* Show summary
+
+```{r message=FALSE}
+library(RepDataPeerAssessment1)
+data("activity")
+head(activity)
+```
+
+
+```{r}
+dim(activity)
+```
+
+```{r}
+names(activity)
+```
+
+```{r}
+summary(activity)
+```
 
 
 ## What is mean total number of steps taken per day?
+We will ignore the NAs in this part of the assignment.
+
+### Histogram of total number of steps each day
+
+
+### Find the **mean** and the **median** total number of steps per day
 
 
 
