@@ -10,6 +10,6 @@ hello()
 Nothing
 }
 \description{
-It just ays "hello
+It just says "hello
 }
 
