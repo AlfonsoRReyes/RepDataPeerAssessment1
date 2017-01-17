@@ -1,11 +1,11 @@
 Package: RepDataPeerAssessment1
 Type: Package
-Title: What the Package Does (Title Case)
+Title: Reproducible Research Assignment 1. Developed as a package
 Version: 0.1.0
-Author: Who wrote it
-Maintainer: The package maintainer <yourself@somewhere.net>
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
+Author: Alfonso R. Reyes
+Maintainer: The package maintainer <alfonso.r.reyes@gmail.com>
+Description: Intention is to get more acquinted with developing R packages.
+    Will use this Reproducible Research Assignment to practice R package dev.
 License: CC0
 Encoding: UTF-8
 LazyData: true
