@@ -102,6 +102,7 @@ str(activity)
 We will ignore the NAs in this part of the assignment. 
 
 ```{r}
+# get only observations that are not NA
 complete <- complete.cases(activity)
 activity.cases <- activity[complete, ]
 ```
@@ -112,6 +113,7 @@ activity.cases <- activity[complete, ]
 ```{r}
 hist(activity.cases$steps, breaks = 60)
 ```
+
 ```{r}
 hist(activity.cases$steps, breaks = 30)
 ```
@@ -127,6 +129,15 @@ mean(activity.cases$steps)
 median(activity.cases$steps)
 ```
 
+### How many unique intervals are there?
+We want to know how many unique intervals there are because we will need later to calculate the maximum steps per interval and we need this number to verify our count of intervals is correct.
+
+```{r}
+unique(activity.cases$interval)
+```
+So, there are `r length(unique(activity.cases$interval))` intervals.
+
+
 
 ## What is the average daily activity pattern?
 
@@ -138,30 +149,19 @@ plot(activity.cases$interval, activity.cases$steps, type = "l")
 ```
 
 
-```{r}
 
-
-```
 
 
 ```{r}
-
-```
-
-```{r}
-
-```
-
-
-```{r}
-byDate.steps <- aggregate(activity.cases$steps, by = list(activity.cases$Date), mean)
+byDate.steps.mean <- aggregate(activity.cases$steps, by = list(activity.cases$date), mean)
 # rename the variable to something meaningful
-names(byDate.steps) <- c("Day", "mean.steps")
-plot(byDate.steps$Day, byDate.steps$mean.steps, type = "l")
+names(byDate.steps.mean) <- c("Day", "mean.steps")
+plot(byDate.steps.mean$Day, byDate.steps.mean$mean.steps, type = "l")
 ```
 
 ### Find day and interval with maximum number of steps
 Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?
+
 
 ```{r}
 max(activity.cases$steps)
@@ -174,11 +174,13 @@ max.steps <- max(activity.cases$steps)
 max.steps
 ```
 
+
 ```{r}
 index <- which(activity.cases$steps == max.steps)
 whole_row <- activity.cases[index, ]
 whole_row
 ```
+
 
 
 ```{r}
@@ -187,11 +189,24 @@ whole_row
 
 ```{r}
 # Find max steps per day and plot
-byDate.steps.max <- aggregate(activity.cases$steps, by = list(activity.cases$Date), max)
+byDate.steps.max <- aggregate(activity.cases$steps, by = list(activity.cases$date), max)
 names(byDate.steps.max) <- c("Day", "steps.max")
 plot(byDate.steps.max$Day, byDate.steps.max$steps.max, type = "l")
 ```
 
+By interval
+
+```{r}
+byInterval <- aggregate(activity.cases$steps, 
+                        by = list(activity.cases$interval), 
+                        max)
+
+sorted <- byInterval[order(-byInterval$x), ]
+```
+
+```{r}
+names(byInterval)
+```
 
 
 ## Imputing missing values
@@ -202,15 +217,6 @@ plot(byDate.steps.max$Day, byDate.steps.max$steps.max, type = "l")
 
 
 
-
-## Figures
-
-The figure sizes have been customised so that you can easily put two images side-by-side. 
-
-```{r,  fig.cap="my caption"}
-plot(1:10)
-
-```
 
 
 ## More Examples
