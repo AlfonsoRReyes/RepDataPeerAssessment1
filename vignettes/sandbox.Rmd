@@ -1,0 +1,144 @@
+---
+title: "R Notebook"
+output: 
+  html_notebook: 
+    highlight: tango
+    theme: cerulean
+---
+
+```{r}
+library(RepDataPeerAssessment1)
+data("activity")
+head(activity)
+```
+
+
+Reshape data frame to show intervals as columns. Days are shown as rows and steps are the values under the interval columns.
+
+```{r}
+library(reshape)
+
+activity$interval <- as.factor(activity$interval)
+
+names(activity) <- c("value", "date", "interval")
+
+actbycol <- cast(activity, date ~ interval)
+# str(actbycol$"820")
+# write.csv(actbycol, "intervals.csv")
+
+```
+
+```{r}
+view(actbycol)
+```
+
+
+
+```{r}
+# find unique intervals
+unique.intervals <- unique(activity$interval)
+length(unique.intervals)
+```
+
+```{r}
+# determine if there is any NA in at least a column
+# if there is none it means that entire rows only have NAs
+
+length(sapply(actbycol[, 2:289], function(x)any(is.na(x))))
+```
+
+
+## Tests
+
+```{r}
+# extract a day and calculate the sum of all steps for that day
+# this data frame is 288x3
+act_20121129 <- activity[activity$date == "2012-11-29", ]
+sum(act_20121129$value)
+dim(act_20121129)
+head(act_20121129)
+```
+
+
+```{r}
+# extract one day and calculate the total of steps that day
+# this data frame is 1x289. the first column is the date
+bycol_20121129 <- actbycol[actbycol$date == "2012-11-29",]
+total_steps <- rowSums(bycol_20121129[ , 2:289]) # Explicit column numbers
+total_steps
+dim(bycol_20121129)
+head(bycol_20121129)
+```
+
+### Find the rows that are all NA
+
+```{r}
+# this is a data frame 53x289
+mask <-complete.cases(actbycol)
+actbycol.complete <- actbycol[mask, ]
+dim(actbycol.complete)
+
+# calculate the colMeans excluding the date column
+colMeans(actbycol.complete[ , 2:289])  # 288 calculations
+
+```
+
+```{r}
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+```{r}
+# group by date and interval
+byDateIntv <- aggregate(activity$steps, by = list(activity$date, activity$interval), max)
+```
+
+
+```{r}
+library(reshape)
+molten <- melt(activity, id = c("date", "steps"))
+head(molten)
+```
+
+
+
+
+```{r}
+require(reshape2)
+
+indata <- data.frame(  Marker = rep(c("M1","M2","M3","M4"), 3),
+     Genotype = rep(c("G1","G2","G3"), each=4),
+     value = c("AA","TT","GG","CC","AA","GG","AA","TT","GG","CC","AA","GG") )
+
+outdata <- dcast(indata, Marker ~ Genotype)
+head(outdata)
+```
+
+
+
+
+
+
+
+
+
+
+
