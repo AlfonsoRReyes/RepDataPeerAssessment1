@@ -1,2 +1,5 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
+README.nb.html
+README.html
+README.Rmd
