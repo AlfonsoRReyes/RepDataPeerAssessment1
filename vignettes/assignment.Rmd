@@ -95,13 +95,33 @@ summary(activity)
 
 
 ## What is mean total number of steps taken per day?
-We will ignore the NAs in this part of the assignment.
+We will ignore the NAs in this part of the assignment. 
+
+```{r}
+complete <- complete.cases(activity)
+activity.cases <- activity[complete, ]
+```
+
 
 ### Histogram of total number of steps each day
+
+```{r}
+hist(activity.cases$steps, breaks = 60)
+```
+```{r}
+hist(activity.cases$steps, breaks = 30)
+```
 
 
 ### Find the **mean** and the **median** total number of steps per day
 
+```{r}
+mean(activity.cases$steps)
+```
+
+```{r}
+median(activity.cases$steps)
+```
 
 
 ## What is the average daily activity pattern?
