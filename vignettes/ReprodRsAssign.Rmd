@@ -151,13 +151,13 @@ plot(activity.cases$interval, activity.cases$steps, type = "l")
 
 
 
-
 ```{r}
 byDate.steps.mean <- aggregate(activity.cases$steps, by = list(activity.cases$date), mean)
 # rename the variable to something meaningful
 names(byDate.steps.mean) <- c("Day", "mean.steps")
 plot(byDate.steps.mean$Day, byDate.steps.mean$mean.steps, type = "l")
 ```
+
 
 ### Find day and interval with maximum number of steps
 Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?
@@ -169,10 +169,12 @@ max(activity.cases$steps)
 
 
 
+
 ```{r}
 max.steps <- max(activity.cases$steps)
 max.steps
 ```
+
 
 
 ```{r}
@@ -201,15 +203,38 @@ byInterval <- aggregate(activity.cases$steps,
                         by = list(activity.cases$interval), 
                         max)
 
-sorted <- byInterval[order(-byInterval$x), ]
+names(byInterval) <- c("interval", "steps.max")
+sorted <- byInterval[order(-byInterval$steps.max), ]   # order by steps, descending
+head(sorted)
 ```
+
+### Find what are the intervals with more activity
+We will plot the number maximum of steps in logarithmic scale:
 
 ```{r}
-names(byInterval)
+plot(sorted$interval, log10(sorted$steps.max),
+     xlim = c(0, 2500),
+     panel.first = grid(lty = 1))
 ```
 
+What we can see is that the maximum activity occurs between 500 and 2000 steps.
 
 ## Imputing missing values
+
+### Calculate the number of missing values
+
+```{r}
+# get only observations that are  NA
+complete <- complete.cases(activity)
+activity.missing <- activity[!complete, ]
+nrow(activity.missing)
+```
+
+### Complete missing values
+
+
+
+
 
 
 
