@@ -185,11 +185,7 @@ whole_row
 ```
 
 
-
-
-
-By interval
-
+**<u>Grouping by interval</u>**
 ```{r}
 byInterval <- aggregate(activity.cases$steps, 
                         by = list(activity.cases$interval), 
@@ -204,12 +200,20 @@ head(sorted)
 We will plot the number maximum of steps in logarithmic scale:
 
 ```{r}
-plot(sorted$interval, log10(sorted$steps.max),
-     xlim = c(0, 2500),
+plot(sorted$interval, sorted$steps.max, log = "y",
+     xlim = c(0, 2500), ylim = range(1:1000),
      panel.first = grid(lty = 1))
 ```
 
-What we can see is that the maximum activity occurs between 500 and 2000 steps.
+And zooming in in a non-logarithmic plot, we can see that the maximum values are those around 800.
+```{r}
+# non-logarithmic plot
+plot(sorted$interval, sorted$steps.max,
+     xlim = range(0:2500), ylim = range(700:825),
+     panel.first = grid(lty = 1))
+```
+
+What we can confirm is that the maximum activity occurs between **500 and 2000** intervals.
 
 ## D. Imputing missing values
 

@@ -8,9 +8,10 @@ output:
 
 ```{r}
 library(RepDataPeerAssessment1)
-data("activity")
+data(activity)
 head(activity)
 ```
+
 
 
 Reshape data frame to show intervals as columns. Days are shown as rows and steps are the values under the interval columns.
