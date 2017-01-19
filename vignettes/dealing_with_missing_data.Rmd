@@ -3,6 +3,8 @@ title: "dealing with missing data"
 output: html_notebook
 ---
 
+## Using own package
+
 ```{r}
 library(RepDataPeerAssessment1)
 
@@ -10,26 +12,17 @@ data("activity")
 head(activity)
 ```
 
-```{r}
-
-```
 
 ```{r}
-activity
-```
-
-
-
-```{r}
-x0 <- activity$steps
-summary(x0)
+steps <- activity$steps
+summary(steps)
 ```
 
 We have 2304 NA's.
 
 How important is it?
 ```{r}
-mean(is.na(x0))
+mean(is.na(steps))
 ```
 
 We have 13% of missing values.
@@ -49,10 +42,32 @@ filter(activity) %>%
   summarize(zeros = mean(steps != 0, na.rm = TRUE))
 ```
 
-```{r}
+## Where our data lies
 
+```{r}
+is.na(steps)
 ```
 
+### analyze for NAs in a dataframe
+```{r}
+is.na(activity)
+```
+
+### Visualizing missing data in a plot
+
+```{r fig.asp=1}
+image(is.na(activity), 
+      main = "Missing Values", 
+      xlab = "Observation", 
+      ylab = "Variable", 
+      xaxt = "n", 
+      yaxt = "n", 
+      bty = "n")
+
+axis(1, seq(0, 1, length.out = nrow(activity)), 1:nrow(activity), col = "white")
+axis(2, c(0, 0.5, 1), names(activity), col = "white", las = 2)
+
+```
 
 
 
@@ -86,4 +101,6 @@ tail(df)
 ```
 
 In the first example, we identify elements of y that are NA, and replace them with the mean, if so. In the second, we test each element of y; if it is NA, we replace with the mean, otherwise we replace with the original value. 
+
+
 
