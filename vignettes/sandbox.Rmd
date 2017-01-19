@@ -130,9 +130,22 @@ outdata <- dcast(indata, Marker ~ Genotype)
 head(outdata)
 ```
 
+----
+## Removed from assignment. not relevant to the question
+
+#### Time series plot (day vs avg. steps)
+(i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis) 
+
+```{r message=F}
+# added to reproduce the chunk below
+library(RepDataPeerAssessment1)
+data("activity")
+```
 
 
-
+```{r}
+plot(activity.cases$interval, activity.cases$steps, type = "l")
+```
 
 
 
