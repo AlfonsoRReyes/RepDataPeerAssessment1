@@ -13,11 +13,13 @@ knitr::opts_chunk$set(echo = TRUE, comment = NA, error = TRUE)
 ```
 
 
-## Loading and preprocessing the data
+## A. Loading and preprocessing the data
 We start by downloading the raw data using the link provided by the instructor. We use a function that will download the zip file, unpack it and place it in an indicated directory. The function is called `downloadZip`.
 
+### 1. Load the data
 
-### Downloading and unpacking raw data file
+
+#### Downloading and unpacking raw data file
 
 ```{r}
 downloadZip <- function(fileUrl, outDir="./data") {
@@ -35,7 +37,7 @@ downloadZip(fileUrl, outDir = outDir)   # download and unpack zip file
 ```
 
 
-### Create the RData file
+#### Create the RData file
 More RData file may be generated during this assignment. They will be placed under the folder `data`.
 
 ```{r}
@@ -59,7 +61,10 @@ rm(activity)
 system.file(file="data", package="RepDataPeerAssessment1")
 ```
 
-### Basic sanity check
+### 2. Process and transform
+Process/transform the data (if necessary) into a format suitable for your analysis
+
+#### Basic sanity check
 
 * Show first 6 rows of data frame
 * Show dimensions of the data frame
@@ -89,7 +94,7 @@ str(activity)
 summary(activity)
 ```
 
-### Convert variable `date` as.factor to as.date
+#### Convert variable `date` as.factor to as.date
 
 ```{r}
 activity$date <- as.Date(activity$date)
@@ -98,8 +103,10 @@ str(activity)
 ```
 
 
-## What is mean total number of steps taken per day?
+## B. What is mean total number of steps taken per day?
 We will ignore the NAs in this part of the assignment. 
+
+### 1. Calculate the total number of steps taken per day
 
 ```{r}
 # get only observations that are not NA
@@ -108,7 +115,7 @@ activity.cases <- activity[complete, ]
 ```
 
 
-### Histogram of total number of steps each day
+#### Histogram of total number of steps each day
 
 ```{r}
 hist(activity.cases$steps, breaks = 60)
@@ -119,7 +126,7 @@ hist(activity.cases$steps, breaks = 30)
 ```
 
 
-### Find the **mean** and the **median** total number of steps per day
+#### Find the **mean** and the **median** total number of steps per day
 
 ```{r}
 mean(activity.cases$steps)
@@ -129,7 +136,7 @@ mean(activity.cases$steps)
 median(activity.cases$steps)
 ```
 
-### How many unique intervals are there?
+#### How many unique intervals are there?
 We want to know how many unique intervals there are because we will need later to calculate the maximum steps per interval and we need this number to verify our count of intervals is correct.
 
 ```{r}
@@ -139,9 +146,12 @@ So, there are `r length(unique(activity.cases$interval))` intervals.
 
 
 
-## What is the average daily activity pattern?
+## C. What is the average daily activity pattern?
 
-### Time series plot (day vs avg. steps)
+### 1. Make a time series plot (i.e. type = "l") 
+Make a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis)
+
+#### Time series plot (day vs avg. steps)
 (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis) 
 
 ```{r}
@@ -157,9 +167,10 @@ byDate.steps.mean <- aggregate(activity.cases$steps, by = list(activity.cases$da
 names(byDate.steps.mean) <- c("Day", "mean.steps")
 plot(byDate.steps.mean$Day, byDate.steps.mean$mean.steps, type = "l")
 ```
+### 2. Which interval contain the maximum # of steps
+Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?
 
-
-### Find day and interval with maximum number of steps
+#### Find day and interval with maximum number of steps
 Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?
 
 
@@ -208,7 +219,7 @@ sorted <- byInterval[order(-byInterval$steps.max), ]   # order by steps, descend
 head(sorted)
 ```
 
-### Find what are the intervals with more activity
+#### Find what are the intervals with more activity
 We will plot the number maximum of steps in logarithmic scale:
 
 ```{r}
@@ -219,9 +230,10 @@ plot(sorted$interval, log10(sorted$steps.max),
 
 What we can see is that the maximum activity occurs between 500 and 2000 steps.
 
-## Imputing missing values
+## D. Imputing missing values
 
-### Calculate the number of missing values
+### 1. Calculate the number of missing values
+Calculate and report the total number of missing values in the dataset (i.e. the total number of rows with NAs)
 
 ```{r}
 # get only observations that are  NA
@@ -230,29 +242,27 @@ activity.missing <- activity[!complete, ]
 nrow(activity.missing)
 ```
 
-### Complete missing values
+### 2. Complete missing values
+Devise a strategy for filling in all of the missing values in the dataset. The strategy does not need to be sophisticated. For example, you could use the mean/median for that day, or the mean for that 5-minute interval, etc.
+
+### 3. Create dataset with missing values filled in
+Create a new dataset that is equal to the original dataset but with the missing data filled in.
+
+### 4. Make a histogram (with missing data filled in)
+Make a histogram of the total number of steps taken each day and Calculate and report the mean and median total number of steps taken per day. Do these values differ from the estimates from the first part of the assignment? What is the impact of imputing missing data on the estimates of the total daily number of steps?
 
 
 
 
 
+## E. Are there differences in activity patterns between weekdays and weekends?
+
+### 1. Create a new factor variable
+Create a new factor variable in the dataset with two levels – “weekday” and “weekend” indicating whether a given date is a weekday or weekend day.
 
 
-## Are there differences in activity patterns between weekdays and weekends?
+### 2. Make a panel
+Make a panel plot containing a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all weekday days or weekend days (y-axis). See the README file in the GitHub repository to see an example of what this plot should look like using simulated data.
 
 
 
-
-
-## More Examples
-
-You can write math expressions, e.g. $Y = X\beta + \epsilon$, footnotes^[A footnote here.], and tables, e.g. using `knitr::kable()`.
-
-```{r, echo=FALSE, results='asis'}
-knitr::kable(head(mtcars, 10))
-```
-
-Also a quote using `>`:
-
-> "He who gives up [code] safety for [code] speed deserves neither."
-([via](https://twitter.com/hadleywickham/status/504368538874703872))
