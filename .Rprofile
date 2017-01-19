@@ -1,3 +1,4 @@
+# open data frames with Excel
 view <- function(data, autofilter=TRUE) {
   # data: data frame
   # autofilter: whether to apply a filter to make sorting and filtering easier
