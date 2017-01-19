@@ -148,6 +148,19 @@ plot(activity.cases$interval, activity.cases$steps, type = "l")
 ```
 
 
+### maximum number of steps by date
+Removed because is not relevant:
+```{r}
+# activity.cases$interval[which(activity.cases$steps == max(activity.cases$steps))]
+```
+
+```{r}
+# Find max steps per day and plot
+byDate.steps.max <- aggregate(activity.cases$steps, by = list(activity.cases$date), max)
+names(byDate.steps.max) <- c("Day", "steps.max")
+plot(byDate.steps.max$Day, byDate.steps.max$steps.max, type = "l")
+```
+
 
 
 
