@@ -1,0 +1,46 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+
+```{r}
+y <- c(NA, 2, 2, NA, NA, 3, NA, 4, NA, NA)
+y
+```
+
+```{r}
+rollForward <- function(x){
+  curr <- 0
+  for (i in 1:length(x)){
+    if (is.na(x[i])){
+      x[i] <- curr
+    }
+    else{
+      curr <- x[i]
+    }
+  }
+  return(x)
+}
+```
+
+
+```{r}
+rollForward(y)
+```
+
+```{r}
+(v <- structure(10*(5:8), names = LETTERS[1:4]))
+```
+
+
+```{r}
+x <- list(a = 1:10, beta = exp(-3:3), logic = c(TRUE,FALSE,FALSE,TRUE))
+x
+```
+
+```{r}
+f2 <- function(x, y) outer(rep(x, length.out = 3), y)
+(a2 <- sapply(v, f2, y = 2*(1:5), simplify = "array"))
+```
+

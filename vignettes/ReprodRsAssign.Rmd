@@ -1,0 +1,253 @@
+---
+title: "Reproducible Research, Assignment 1"
+author: "Alfonso R. Reyes"
+date: "`r Sys.Date()`"
+output:
+  html_document: default
+  html_notebook: default
+---
+
+
+```{r setup, include=FALSE, error=TRUE, message=FALSE}
+knitr::opts_chunk$set(echo = TRUE, comment = NA, error = TRUE)
+```
+
+
+## A. Loading and preprocessing the data
+We start by downloading the raw data using the link provided by the instructor. We use a function that will download the zip file, unpack it and place it in an indicated directory. The function is called `downloadZip`.
+
+### 1. Load the data
+
+
+#### Downloading and unpacking raw data file
+
+```{r}
+downloadZip <- function(fileUrl, outDir="./data") {
+  temp <- tempfile()
+  download.file(fileUrl, temp, mode = "wb")
+  unzip(temp, exdir = outDir)
+}
+```
+
+
+```{r}
+fileUrl <- "https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2Factivity.zip"
+outDir <- "../inst/extdata"             # folder for raw data
+downloadZip(fileUrl, outDir = outDir)   # download and unpack zip file
+```
+
+
+#### Create the RData file
+More RData file may be generated during this assignment. They will be placed under the folder `data`.
+
+```{r, results='hold'}
+# get the base folder and raw data folder
+baseLoc <- system.file(package="RepDataPeerAssessment1")
+extPath <- file.path(baseLoc, "extdata")
+baseLoc
+extPath
+```
+
+#### Saving the dataset to `data`
+Reads the CSV raw data file from `inst/extdata` and save it under `data`. Then remove it from memory.
+```{r}
+# save the dataset
+activity <- read.csv(paste(extPath, "activity.csv", sep = "/"))
+save(activity, file="../data/activity.RData")
+rm(activity)
+```
+
+Confirm it has been saved:
+```{r}
+# this will work after at least a data file has been saved to this folder
+system.file(file="data", package="RepDataPeerAssessment1")
+```
+
+### 2. Process and transform
+Process/transform the data (if necessary) into a format suitable for the analysis.
+
+#### Basic sanity check
+
+* Show first 6 rows of data frame
+* Show dimensions of the data frame
+* Show variable names
+* Show summary
+
+```{r message=FALSE}
+library(RepDataPeerAssessment1)
+data("activity")
+head(activity)
+```
+
+**<u>Show dimensions</u>**
+```{r}
+dim(activity)
+```
+**<u>Names of the variables</u>**
+
+```{r}
+names(activity)
+```
+
+**<u>Structure</u>**
+
+```{r}
+str(activity)
+```
+
+**<u>Summary</u>**
+```{r}
+summary(activity)
+```
+
+#### Convert variable `date` as.factor to `as.date`
+
+```{r}
+activity$date <- as.Date(activity$date)
+save(activity, file="../data/activity.RData")      # save the modified dataset
+str(activity)                                      # confirm the new structure
+```
+
+## B. What is mean total number of steps taken per day?
+We will ignore the NAs in this part of the assignment. 
+
+### 1. Calculate the total number of steps taken per day
+
+```{r}
+# get only observations that are not NA
+complete <- complete.cases(activity)
+activity.cases <- activity[complete, ]
+```
+
+
+#### Histogram of total number of steps each day
+
+
+```{r}
+hist(activity.cases$steps, breaks = 30)
+```
+
+
+#### Find the **mean** and the **median** total number of steps per day
+
+```{r}
+mean(activity.cases$steps)
+```
+
+```{r}
+median(activity.cases$steps)
+```
+
+#### How many unique intervals are there?
+We want to know how many unique intervals there are because we will need later to calculate the maximum steps per interval and we need this number to verify our count of intervals is correct.
+
+```{r}
+unique(activity.cases$interval)
+```
+So, there are `r length(unique(activity.cases$interval))` **unique** intervals.
+
+-----
+
+## C. What is the average daily activity pattern?
+
+### 1. Make a time series plot (i.e. type = "l") 
+Make a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis)
+
+
+
+
+
+
+```{r}
+byDate.steps.mean <- aggregate(activity.cases$steps, by = list(activity.cases$date), mean)
+# rename the variable to something meaningful
+names(byDate.steps.mean) <- c("Day", "mean.steps")
+plot(byDate.steps.mean$Day, byDate.steps.mean$mean.steps, type = "l")
+```
+
+### 2. Which interval contain the maximum # of steps
+Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?
+
+#### Find day and interval with maximum number of steps
+Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?
+
+Let's find the maximum number of steps:
+```{r}
+max.steps <- max(activity.cases$steps)
+max.steps
+```
+
+Now, let's find which interval holds the maximum number of steps:
+```{r}
+index <- which(activity.cases$steps == max.steps)
+whole_row <- activity.cases[index, ]
+whole_row
+```
+
+
+**<u>Grouping by interval</u>**
+```{r}
+byInterval <- aggregate(activity.cases$steps, 
+                        by = list(activity.cases$interval), 
+                        max)
+
+names(byInterval) <- c("interval", "steps.max")
+sorted <- byInterval[order(-byInterval$steps.max), ]   # order by steps, descending
+head(sorted)
+```
+
+#### Find what are the intervals with more activity
+We will plot the number maximum of steps in logarithmic scale:
+
+```{r}
+plot(sorted$interval, sorted$steps.max, log = "y",
+     xlim = c(0, 2500), ylim = range(1:1000),
+     panel.first = grid(lty = 1))
+```
+
+And zooming in in a non-logarithmic plot, we can see that the maximum values are those around 800.
+```{r}
+# non-logarithmic plot
+plot(sorted$interval, sorted$steps.max,
+     xlim = range(0:2500), ylim = range(700:825),
+     panel.first = grid(lty = 1))
+```
+
+What we can confirm is that the maximum activity occurs between **500 and 2000** intervals.
+
+## D. Imputing missing values
+
+### 1. Calculate the number of missing values
+Calculate and report the total number of missing values in the dataset (i.e. the total number of rows with NAs)
+
+```{r}
+# get only observations that are  NA
+complete <- complete.cases(activity)
+activity.missing <- activity[!complete, ]
+nrow(activity.missing)
+```
+
+### 2. Complete missing values
+Devise a strategy for filling in all of the missing values in the dataset. The strategy does not need to be sophisticated. For example, you could use the mean/median for that day, or the mean for that 5-minute interval, etc.
+
+### 3. Create dataset with missing values filled in
+Create a new dataset that is equal to the original dataset but with the missing data filled in.
+
+### 4. Make a histogram (with missing data filled in)
+Make a histogram of the total number of steps taken each day and Calculate and report the mean and median total number of steps taken per day. Do these values differ from the estimates from the first part of the assignment? What is the impact of imputing missing data on the estimates of the total daily number of steps?
+
+
+
+
+
+## E. Are there differences in activity patterns between weekdays and weekends?
+
+### 1. Create a new factor variable
+Create a new factor variable in the dataset with two levels – “weekday” and “weekend” indicating whether a given date is a weekday or weekend day.
+
+
+### 2. Make a panel
+Make a panel plot containing a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all weekday days or weekend days (y-axis). See the README file in the GitHub repository to see an example of what this plot should look like using simulated data.
+
+
+
