@@ -40,7 +40,7 @@ downloadZip(fileUrl, outDir = outDir)   # download and unpack zip file
 #### Create the RData file
 More RData file may be generated during this assignment. They will be placed under the folder `data`.
 
-```{r}
+```{r, results='hold'}
 # get the base folder and raw data folder
 baseLoc <- system.file(package="RepDataPeerAssessment1")
 extPath <- file.path(baseLoc, "extdata")
@@ -48,21 +48,23 @@ baseLoc
 extPath
 ```
 
+#### Saving the dataset to `data`
+Reads the CSV raw data file from `inst/extdata` and save it under `data`. Then remove it from memory.
 ```{r}
-# save the 
+# save the dataset
 activity <- read.csv(paste(extPath, "activity.csv", sep = "/"))
 save(activity, file="../data/activity.RData")
 rm(activity)
 ```
 
-
+Confirm it has been saved:
 ```{r}
 # this will work after at least a data file has been saved to this folder
 system.file(file="data", package="RepDataPeerAssessment1")
 ```
 
 ### 2. Process and transform
-Process/transform the data (if necessary) into a format suitable for your analysis
+Process/transform the data (if necessary) into a format suitable for the analysis.
 
 #### Basic sanity check
 
@@ -77,31 +79,34 @@ data("activity")
 head(activity)
 ```
 
-
+**<u>Show dimensions</u>**
 ```{r}
 dim(activity)
 ```
+**<u>Names of the variables</u>**
 
 ```{r}
 names(activity)
 ```
 
+**<u>Structure</u>**
+
 ```{r}
 str(activity)
 ```
 
+**<u>Summary</u>**
 ```{r}
 summary(activity)
 ```
 
-#### Convert variable `date` as.factor to as.date
+#### Convert variable `date` as.factor to `as.date`
 
 ```{r}
 activity$date <- as.Date(activity$date)
-save(activity, file="../data/activity.RData")
-str(activity)
+save(activity, file="../data/activity.RData")      # save the modified dataset
+str(activity)                                      # confirm the new structure
 ```
-
 
 ## B. What is mean total number of steps taken per day?
 We will ignore the NAs in this part of the assignment. 
@@ -117,9 +122,6 @@ activity.cases <- activity[complete, ]
 
 #### Histogram of total number of steps each day
 
-```{r}
-hist(activity.cases$steps, breaks = 60)
-```
 
 ```{r}
 hist(activity.cases$steps, breaks = 30)
@@ -142,9 +144,9 @@ We want to know how many unique intervals there are because we will need later t
 ```{r}
 unique(activity.cases$interval)
 ```
-So, there are `r length(unique(activity.cases$interval))` intervals.
+So, there are `r length(unique(activity.cases$interval))` **unique** intervals.
 
-
+-----
 
 ## C. What is the average daily activity pattern?
 
@@ -167,6 +169,7 @@ byDate.steps.mean <- aggregate(activity.cases$steps, by = list(activity.cases$da
 names(byDate.steps.mean) <- c("Day", "mean.steps")
 plot(byDate.steps.mean$Day, byDate.steps.mean$mean.steps, type = "l")
 ```
+
 ### 2. Which interval contain the maximum # of steps
 Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?
 
