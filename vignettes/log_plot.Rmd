@@ -1,0 +1,58 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+
+```{r}
+# The n variable represents different values of 2N_{g}s
+n <- 1
+ 
+# The x variable is the parameter of the equation and represents u/v, the 
+# mutation rate from "optimal" to "non-optimal" codon
+x <- seq(0, 100, by=.0001)
+ 
+y <- exp(n)/(exp(n)+x)
+
+plot(x, y, type="l",
+     xlab="Mutation rate toward non-optimal codon (u/v)",
+     ylab="Equilibrium frequency of optimal codon (p̃)")
+ 
+n <- 3
+y <- exp(n)/(exp(n)+x)
+lines(x, y=y, col="blue")
+ 
+n <- 0
+y <- exp(n)/(exp(n)+x)
+lines(x, y=y, col="red")
+```
+
+```{r}
+# The n variable represents different values of 2N_{g}s
+n <- 1
+ 
+# The x variable is the parameter of the equation and represents u/v, the 
+# mutation rate from "optimal" to "non-optimal" codon
+x <- seq(0, 100, by=.0001)
+ 
+y <- exp(n) / (exp(n)+x)
+
+plot(x, y, log="x", type="l", 
+     xaxt="n", 
+     xlim=c(0.01, 100),
+     xlab="Mutation rate toward non-optimal codon (u/v)",
+     ylab="Equilibrium frequency of optimal codon (p̃)")
+
+ticks <- seq(-2, 2, by=1)
+labels <- sapply(ticks, function(i) as.expression(bquote(10^ .(i))))
+axis(1, at=c(0.01, 0.1, 1, 10, 100), labels=labels)
+ 
+n <- 3
+y <- exp(n)/(exp(n)+x)
+lines(x, y=y, col="blue")
+ 
+n <- 0
+y <- exp(n)/(exp(n)+x)
+lines(x, y=y, col="red")
+```
+
