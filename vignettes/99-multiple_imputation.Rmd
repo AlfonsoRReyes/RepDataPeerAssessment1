@@ -79,6 +79,26 @@ imp <- replicate(15,
 imp
 ```
 
+
+```{r}
+calcAfter <- function(x, samples) {
+  na.count <- length(x[is.na(x) == TRUE])    # calculate the # of NAs
+  
+  imp <- replicate(samples, c(x[!is.na(x)],
+                     sample(x[!is.na(x)], na.count, TRUE)),  
+                   simplify = FALSE)                  
+  
+  means <- sapply(imp, mean)
+  list(means = means)
+}
+```
+
+
+```{r}
+calcAfter(x0, 5)
+```
+
+
 Now, let's see if something changed:
 
 ```{r}
