@@ -43,17 +43,35 @@ filter(activity) %>%
 ```
 
 ## Where our data lies
+Source: http://thomasleeper.com/Rcourse/Tutorials/NAhandling.html
 
+Analyze a vector or variable of the dataframe:
 ```{r}
 is.na(steps)
 ```
 
-### analyze for NAs in a dataframe
+Analyze for NAs in a the whole dataframe:
 ```{r}
 is.na(activity)
 ```
 
 ### Visualizing missing data in a plot
+```{r, fig.asp=1}
+image(is.na(activity),
+      xaxt = "n",         # suppress plotting of x axis
+      yaxt = "n",         # suppress plotting of y axis
+      bty = "n"           # do not draw a box around
+      )
+
+# custom labels for x and y axis
+axis(1, seq(0, 1, length.out = nrow(activity)), 1:nrow(activity), col = "white")
+axis(2,                 # y axis
+     c(0, 0.5, 1),      # sequence of labels
+     names(activity),   # variables names of data frame
+     col = "white",     # color
+     las = 2)           # 2: perpendicular to the axis. Defaults = 0
+```
+
 
 ```{r fig.asp=1}
 image(is.na(activity), 
