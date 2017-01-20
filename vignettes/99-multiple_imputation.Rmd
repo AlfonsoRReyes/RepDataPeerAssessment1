@@ -1,0 +1,45 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+Source: http://thomasleeper.com/Rcourse/Tutorials/mi.html
+
+```{r}
+n <- 10
+bad <- 4
+good <- n - bad
+
+set.seed(10)
+x <- c(sample(1:n, good, replace = TRUE), rep(NA, bad))
+x
+```
+
+```{r}
+mean(x, na.rm = TRUE)
+```
+
+Standard Error of only the elements that are not NA:
+```{r}
+sd(x, na.rm = TRUE) / sqrt(sum(!is.na(x)))
+```
+Generate 15 samples of new data replacing the NA elements with values extracted from the GOOD values.
+
+```{r}
+na.count <- length(x[is.na(x) == TRUE])
+```
+
+```{r}
+na.count <- length(x[is.na(x) == TRUE])    # calculate the # of NAs
+
+imp <- replicate(15, 
+                 c(x[!is.na(x)],                           # get the 7 non-NA elements
+                   sample(x[!is.na(x)], na.count, TRUE)),  # get 3 elements from non-NA vec
+                 simplify = FALSE)                         # output to be a vector
+imp
+```
+
+```{r}
+c(x[!is.na(x)])
+sample(x[!is.na(x)], 3, TRUE)
+```
+

@@ -47,12 +47,13 @@ Source: http://thomasleeper.com/Rcourse/Tutorials/NAhandling.html
 
 Analyze a vector or variable of the dataframe:
 ```{r}
-is.na(steps)
+length(steps[is.na(steps) == TRUE])     # number of NAs
 ```
 
 Analyze for NAs in a the whole dataframe:
 ```{r}
-is.na(activity)
+head(is.na(activity))
+length(steps[is.na(steps) == FALSE])     # number of non-NAs
 ```
 
 ### Visualizing missing data in a plot
@@ -70,22 +71,12 @@ axis(2,                 # y axis
      names(activity),   # variables names of data frame
      col = "white",     # color
      las = 2)           # 2: perpendicular to the axis. Defaults = 0
+
+box(lty = '1373', col = 'black')    # draw a box around
 ```
 
 
-```{r fig.asp=1}
-image(is.na(activity), 
-      main = "Missing Values", 
-      xlab = "Observation", 
-      ylab = "Variable", 
-      xaxt = "n", 
-      yaxt = "n", 
-      bty = "n")
 
-axis(1, seq(0, 1, length.out = nrow(activity)), 1:nrow(activity), col = "white")
-axis(2, c(0, 0.5, 1), names(activity), col = "white", las = 2)
-
-```
 
 
 
