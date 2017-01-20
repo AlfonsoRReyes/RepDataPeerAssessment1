@@ -1,12 +1,19 @@
 ---
-title: "R Notebook"
-output: html_notebook
+title: "Multiple Imputation"
+output:
+  html_document: default
+  html_notebook: default
 ---
+
+```{r setup, include=FALSE, error=TRUE, message=FALSE}
+knitr::opts_chunk$set(echo = TRUE, comment = NA, error = TRUE)
+```
+
 Source: http://thomasleeper.com/Rcourse/Tutorials/mi.html
 
 ```{r}
 n <- 10
-bad <- 5
+bad <- 3
 good <- n - bad
 
 set.seed(10)
@@ -36,7 +43,9 @@ imp <- replicate(15,
 imp
 ```
 
-## Applying the concept
+
+## Applying the concept to the `activity` dataset
+The dataset has to be transformed and put the intervals as variables and the steps as values. The date is the ID or index.
 
 ```{r}
 library(reshape)
@@ -47,12 +56,40 @@ data(activity)
 activity$interval <- as.factor(activity$interval)
 names(activity) <- c("value", "date", "interval")
 actbycol <- cast(activity, date ~ interval)
-actbycol
+# head(actbycol[,1:5])
+# head(actbycol[,285:289])
+#head(actbycol[,ncol(actbycol):ncol(actbycol)-5])
+# tail(actbycol[,1:5])
 ```
+
+```{r}
+actbycol.melt <- melt(actbycol, id = "date")
+rownames(actbycol.melt) <- NULL
+hist(subset(actbycol.melt, actbycol.melt$value > 0)$value)
+```
+
+
+```{r}
+cat("# of variables:", (ncol(actbycol)), "\t")
+cat("# of intervals:", (ncol(actbycol)-1))
+mysample <- actbycol[sample(1:nrow(actbycol), 10, replace=FALSE), c(1:7, 283:289)]
+mysample
+```
+
+```{r}
+library(data.table)
+set.seed(10)
+
+mtcars <- data.table(mtcars)
+mtcars[sample(.N, 6)]
+```
+
+
+
 
 ### Starting with interval `0`
 In our case, the vector to investigate is any of the interval columns.
-Let's start with interval 0.
+Let's start with interval 0 assigning it as a vector.
 
 ```{r}
 x0 <- actbycol$`0`
@@ -98,7 +135,7 @@ calcAfter <- function(x, samples = 15) {
   grandvar <- within + ((1 + (1/length(imp))) * between)
   grandse <- sqrt(grandvar)
   
-  list(means = means, grandMeans = grandm, grandSE = grandse)
+  list(grandMeans = grandm, grandSE = grandse)
 }
 ```
 
@@ -162,15 +199,20 @@ calcAfter(x10)
 calcBefore(actbycol$`15`)
 ```
 ```{r}
-calcBefore(actbycol$`25`)
+x25 <- actbycol$`25`
+calcBefore(x25)
+calcAfter(x25)
 ```
 
+
+
+## `lapply` example
 ```{r}
 y <- list(a = 1:5, b = rnorm(10))
 y
 lapply(y, mean)
 ```
-
+## `sapply` example
 
 ```{r}
 y <- list(a = 1:5, b = rnorm(10))
@@ -178,8 +220,10 @@ y
 sapply(y, mean)
 ```
 
+## Vectorizing functions
 
 ```{r}
+# subset of only the numerical data, no date
 actbycol2 <- actbycol[, 2:289]
 ```
 
@@ -187,5 +231,151 @@ actbycol2 <- actbycol[, 2:289]
 Applying a function to all the dataframe, excluding the date""
 ```{r}
 sapply(actbycol2, calcBefore)
+```
+### Calculating the Standard Error
+
+```{r}
+sapply(actbycol2, calcAfter)
+```
+
+## 3. Imputation with mean / median / mode
+Source: https://www.r-bloggers.com/missing-value-treatment/
+
+Replacing the missing values with the mean / median / mode is a crude way of treating missing values. Depending on the context, like if the variation is low or if the variable has low leverage over the response, such a rough approximation is acceptable and could possibly give satisfactory results.
+
+```{r}
+# initialize the data
+data ("BostonHousing", package="mlbench")
+original <- BostonHousing  # backup original data
+
+# Introduce missing values
+set.seed(100)
+BostonHousing[sample(1:nrow(BostonHousing), 40), "rad"] <- NA
+BostonHousing[sample(1:nrow(BostonHousing), 40), "ptratio"]   
+```
+
+```{r}
+names(BostonHousing)
+```
+
+
+```{r}
+# Pattern of missing values
+library(mice)
+md.pattern(BostonHousing)  # pattern or missing values in data.
+```
+
+```{r}
+# Example
+lm(medv ~ ptratio + rad, data=BostonHousing, na.action=na.omit)
+```
+
+
+```{r}
+library(Hmisc)
+impute(BostonHousing$ptratio, mean)  # replace with mean
+impute(BostonHousing$ptratio, median)  # median
+impute(BostonHousing$ptratio, 20)  # replace specific number
+
+# or if you want to impute manually
+BostonHousing$ptratio[is.na(BostonHousing$ptratio)] <- mean(BostonHousing$ptratio, 
+                                                            na.rm = T)  # not run
+```
+
+
+Lets compute the accuracy when it is imputed with mean
+
+```{r}
+library(DMwR)
+actuals <- original$ptratio[is.na(BostonHousing$ptratio)]
+predicteds <- rep(mean(BostonHousing$ptratio, na.rm=T), length(actuals))
+regr.eval(actuals, predicteds)
+
+#>        mae        mse       rmse       mape 
+#> 1.62324034 4.19306071 2.04769644 0.095456
+```
+
+
+```{r}
+hist(activity$value)
+```
+### histogram of activity without zeros
+```{r}
+activity.nonzero <- subset(activity, activity$value > 0)
+hist(activity.nonzero$value)
+```
+
+```{r}
+random.imp <- function (a){
+  missing <- is.na(a)        # logical vector. TRUE for NAs
+  n.missing <- sum(missing)  # number of missing values
+  a.obs <- a[!missing]       # vector of GOOD values
+  imputed <- a               # copy of original vector
+  
+  # Take a sample from GOOD part of the vector and replace missing elements
+  imputed[missing] <- sample (a.obs, n.missing, replace=TRUE)
+  return (imputed)           # return complete vector
+}
+```
+
+```{r}
+x
+```
+
+```{r}
+missing <- is.na(x)
+missing
+```
+```{r}
+n.missing <- sum(missing)
+n.missing
+```
+```{r}
+x.obs <- x[!missing]
+x.obs
+```
+
+```{r}
+imputed <- x
+imputed
+```
+
+```{r}
+imputed[missing] <- sample (x.obs, n.missing, replace=TRUE)
+imputed
+```
+
+
+
+
+### Running function on a vector
+
+```{r}
+random.imp(x)
+```
+
+### Running function on `actbycol2`
+
+```{r}
+x0
+random.imp(x0)
+```
+
+```{r}
+actbycol2[, 1:10]
+```
+
+```{r}
+actbycol.rep <- random.imp(actbycol2[, 1:10])
+actbycol.rep
+```
+
+```{r}
+actbycol2
+```
+
+```{r}
+actbycol.rep <- random.imp(actbycol2)
+actbycol.rep
 ```
 
