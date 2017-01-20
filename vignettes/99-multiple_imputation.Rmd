@@ -6,7 +6,7 @@ Source: http://thomasleeper.com/Rcourse/Tutorials/mi.html
 
 ```{r}
 n <- 10
-bad <- 4
+bad <- 5
 good <- n - bad
 
 set.seed(10)
@@ -24,9 +24,7 @@ sd(x, na.rm = TRUE) / sqrt(sum(!is.na(x)))
 ```
 Generate 15 samples of new data replacing the NA elements with values extracted from the GOOD values.
 
-```{r}
-na.count <- length(x[is.na(x) == TRUE])
-```
+
 
 ```{r}
 na.count <- length(x[is.na(x) == TRUE])    # calculate the # of NAs
@@ -38,8 +36,123 @@ imp <- replicate(15,
 imp
 ```
 
+## Applying the concept
+
 ```{r}
-c(x[!is.na(x)])
-sample(x[!is.na(x)], 3, TRUE)
+library(reshape)
+library(RepDataPeerAssessment1)
+
+data(activity)
+
+activity$interval <- as.factor(activity$interval)
+names(activity) <- c("value", "date", "interval")
+actbycol <- cast(activity, date ~ interval)
+actbycol
+```
+
+### Starting with interval `0`
+In our case, the vector to investigate is any of the interval columns.
+Let's start with interval 0.
+
+```{r}
+x0 <- actbycol$`0`
+x0
+```
+
+The mean is:
+```{r}
+mean(x0, na.rm = TRUE)
+```
+The standard error:
+```{r}
+sd(x0, na.rm = TRUE) / sqrt(sum(!is.na(x0)))
+```
+
+```{r}
+x <- x0
+na.count <- length(x[is.na(x) == TRUE])    # calculate the # of NAs
+
+imp <- replicate(15, 
+                 c(x[!is.na(x)],                           # get the 7 non-NA elements
+                   sample(x[!is.na(x)], na.count, TRUE)),  # get 3 elements from non-NA vec
+                 simplify = FALSE)                         # output to be a vector
+imp
+```
+
+Now, let's see if something changed:
+
+```{r}
+means <- sapply(imp, mean)
+means
+```
+
+```{r}
+grandm <- mean(means)
+grandm
+```
+
+```{r}
+ses <- sapply(imp, sd)/sqrt(10)
+within <- mean(ses)
+between <- sum((means - grandm)^2)/(length(imp) - 1)
+
+grandvar <- within + ((1 + (1/length(imp))) * between)
+grandse <- sqrt(grandvar)
+grandse
+```
+
+### Applying on interval `5` but with a function
+
+```{r}
+calcBefore <- function(x) {
+  na.count <- length(x[is.na(x) == TRUE])    # calculate the # of NAs
+  notna.count <- length(x[is.na(x) == FALSE]) 
+  mean <- mean(x, na.rm = TRUE)
+  serror <- sd(x, na.rm = TRUE) / sqrt(sum(!is.na(x)))
+  list(notna = notna.count, na = na.count, mean = mean, stdError = serror)
+}
+```
+
+```{r}
+calcBefore(x0)
+```
+
+```{r}
+calcBefore(actbycol$`5`)
+```
+
+```{r}
+calcBefore(actbycol$`10`)
+```
+
+```{r}
+calcBefore(actbycol$`15`)
+```
+```{r}
+calcBefore(actbycol$`25`)
+```
+
+```{r}
+y <- list(a = 1:5, b = rnorm(10))
+y
+lapply(y, mean)
+```
+
+
+```{r}
+y <- list(a = 1:5, b = rnorm(10))
+y
+sapply(y, mean)
+```
+
+
+```{r}
+actbycol2 <- actbycol[, 2:289]
+```
+
+
+Applying a function to all the dataframe, excluding the date""
+```{r}
+sapply(actbycol2, calcBefore)
 ```
 
