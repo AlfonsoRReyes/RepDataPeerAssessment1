@@ -81,7 +81,7 @@ imp
 
 
 ```{r}
-calcAfter <- function(x, samples) {
+calcAfter <- function(x, samples = 15) {
   na.count <- length(x[is.na(x) == TRUE])    # calculate the # of NAs
   
   imp <- replicate(samples, c(x[!is.na(x)],
@@ -89,13 +89,22 @@ calcAfter <- function(x, samples) {
                    simplify = FALSE)                  
   
   means <- sapply(imp, mean)
-  list(means = means)
+  grandm <- mean(means)
+  
+  ses <- sapply(imp, sd)/sqrt(10)
+  within <- mean(ses)
+  between <- sum((means - grandm)^2)/(length(imp) - 1)
+  
+  grandvar <- within + ((1 + (1/length(imp))) * between)
+  grandse <- sqrt(grandvar)
+  
+  list(means = means, grandMeans = grandm, grandSE = grandse)
 }
 ```
 
 
 ```{r}
-calcAfter(x0, 5)
+calcAfter(x0, 15)
 ```
 
 
@@ -138,11 +147,15 @@ calcBefore(x0)
 ```
 
 ```{r}
-calcBefore(actbycol$`5`)
+x5 <- actbycol$`5`
+calcBefore(x5)
+calcAfter(x5)
 ```
 
 ```{r}
-calcBefore(actbycol$`10`)
+x10 <- actbycol$`10`
+calcBefore(x10)
+calcAfter(x10)
 ```
 
 ```{r}
