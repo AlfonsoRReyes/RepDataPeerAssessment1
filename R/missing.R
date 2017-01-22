@@ -92,23 +92,6 @@ nas.plot.frequency <- function(df, na.var, step = 30, ylim = 0) {
           xlab="Steps",
           ylab="Frequency")
 
-  # box()
-  #
-  # with(df,
-  #   tp <- xyplot(imp, steps~interval,
-  #                na.groups = ici(imp),
-  #                ylab = "steps",
-  #                xlab = "interval",
-  #                cex = 0.75,
-  #
-  #                lex=lwd
-  #                #ylim = c(0, 900),
-  #                #xlim = c(0, 500))
-  #   )
-  # )
-  # print(tp, newpage = FALSE, position = c(0.48,0.08,1,0.92))
-  # #tp
-
   list(breaks = breaks, obs = obs, mis = mis, max = max, min = min, len_obs = length(obs), len_mis = length(mis))
 
 }
