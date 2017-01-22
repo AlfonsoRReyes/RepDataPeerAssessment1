@@ -1,0 +1,61 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+## 3. Imputation with mean / median / mode
+Source: https://www.r-bloggers.com/missing-value-treatment/
+
+Replacing the missing values with the mean / median / mode is a crude way of treating missing values. Depending on the context, like if the variation is low or if the variable has low leverage over the response, such a rough approximation is acceptable and could possibly give satisfactory results.
+
+```{r}
+# initialize the data
+data ("BostonHousing", package="mlbench")
+original <- BostonHousing  # backup original data
+
+# Introduce missing values
+set.seed(100)
+BostonHousing[sample(1:nrow(BostonHousing), 40), "rad"] <- NA
+BostonHousing[sample(1:nrow(BostonHousing), 40), "ptratio"]   
+```
+
+```{r}
+names(BostonHousing)
+```
+
+
+```{r}
+# Pattern of missing values
+library(mice)
+md.pattern(BostonHousing)  # pattern or missing values in data.
+```
+
+```{r}
+# Example
+lm(medv ~ ptratio + rad, data=BostonHousing, na.action=na.omit)
+```
+
+
+```{r}
+library(Hmisc)
+impute(BostonHousing$ptratio, mean)  # replace with mean
+impute(BostonHousing$ptratio, median)  # median
+impute(BostonHousing$ptratio, 20)  # replace specific number
+
+# or if you want to impute manually
+BostonHousing$ptratio[is.na(BostonHousing$ptratio)] <- mean(BostonHousing$ptratio, 
+                                                            na.rm = T)  # not run
+```
+
+
+Lets compute the accuracy when it is imputed with mean
+
+```{r}
+library(DMwR)
+actuals <- original$ptratio[is.na(BostonHousing$ptratio)]
+predicteds <- rep(mean(BostonHousing$ptratio, na.rm=T), length(actuals))
+regr.eval(actuals, predicteds)
+
+#>        mae        mse       rmse       mape 
+#> 1.62324034 4.19306071 2.04769644 0.095456
+```
