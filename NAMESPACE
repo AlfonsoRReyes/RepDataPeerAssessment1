@@ -2,5 +2,13 @@
 
 export(downloadZip)
 export(hello)
+export(nas.complete)
+export(nas.count)
+export(nas.missing)
+export(nas.plot.frequency)
+importFrom(graphics,hist)
+importFrom(graphics,matplot)
+importFrom(mice,mdc)
+importFrom(stats,complete.cases)
 importFrom(utils,download.file)
 importFrom(utils,unzip)
