@@ -47,11 +47,12 @@ nas.missing <- function(x) {
 #'
 nas.plot.frequency <- function(df, na.var, step = 30, ylim = 0) {
 
+  # par(mfrow = c(1,2))
+
   # library(mice)
   # var.name <- eval(substitute(na.var), df, parent.frame())
   # var.name <- deparse(substitute(na.var))
   var.name <- eval(substitute(na.var), df)
-
 
   lwd <- 1.5
   nudge <- 1
@@ -83,13 +84,32 @@ nas.plot.frequency <- function(df, na.var, step = 30, ylim = 0) {
     }
 
   matplot(x, y, type="s",
-          col=c(mice::mdc(4), mice::mdc(5)), lwd=2, lty=1,
+          col = c(mice::mdc(4), mice::mdc(5)),
+          lwd=2, lty=1,
           #xlim = c(0, 170),
           ylim = ylim,
           yaxs = "i",
           xlab="Steps",
           ylab="Frequency")
 
+  # box()
+  #
+  # with(df,
+  #   tp <- xyplot(imp, steps~interval,
+  #                na.groups = ici(imp),
+  #                ylab = "steps",
+  #                xlab = "interval",
+  #                cex = 0.75,
+  #
+  #                lex=lwd
+  #                #ylim = c(0, 900),
+  #                #xlim = c(0, 500))
+  #   )
+  # )
+  # print(tp, newpage = FALSE, position = c(0.48,0.08,1,0.92))
+  # #tp
+
   list(breaks = breaks, obs = obs, mis = mis, max = max, min = min, len_obs = length(obs), len_mis = length(mis))
 
 }
+
