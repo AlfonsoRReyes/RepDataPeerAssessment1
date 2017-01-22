@@ -105,11 +105,11 @@ imp <- replicate(15,
 imp
 ```
 
-
+  
 ```{r}
 calcAfter <- function(x, samples = 15) {
   na.count <- length(x[is.na(x) == TRUE])    # calculate the # of NAs
-  
+
   imp <- replicate(samples, c(x[!is.na(x)],
                      sample(x[!is.na(x)], na.count, TRUE)),  
                    simplify = FALSE)                  
@@ -184,9 +184,7 @@ calcBefore(x10)
 calcAfter(x10)
 ```
 
-```{r}
-calcBefore(actbycol$`15`)
-```
+
 ```{r}
 x25 <- actbycol$`25`
 calcBefore(x25)
