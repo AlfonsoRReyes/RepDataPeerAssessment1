@@ -191,15 +191,15 @@ calcBefore(x25)
 calcAfter(x25)
 ```
 
+## Vectorizing functions
 
-
-## `lapply` example
+### `lapply` example
 ```{r}
 y <- list(a = 1:5, b = rnorm(10))
 y
 lapply(y, mean)
 ```
-## `sapply` example
+### `sapply` example
 
 ```{r}
 y <- list(a = 1:5, b = rnorm(10))
@@ -207,7 +207,6 @@ y
 sapply(y, mean)
 ```
 
-## Vectorizing functions
 
 ```{r}
 # subset of only the numerical data, no date
@@ -219,6 +218,7 @@ Applying a function to all the dataframe, excluding the date""
 ```{r}
 sapply(actbycol2, calcBefore)
 ```
+
 ### Calculating the Standard Error
 
 ```{r}
@@ -227,10 +227,10 @@ sapply(actbycol2, calcAfter)
 
 
 
-
 ```{r}
 hist(activity$value)
 ```
+
 ### histogram of activity without zeros
 ```{r}
 activity.nonzero <- subset(activity, activity$value > 0)
@@ -261,16 +261,20 @@ random.imp <- function (a){
 
 ```{r}
 x
+indNA <- which(is.na(x))   # which rows are NA
+indNA
 ```
 
 ```{r}
 missing <- is.na(x)
 missing
 ```
+
 ```{r}
 n.missing <- sum(missing)
 n.missing
 ```
+
 ```{r}
 x.obs <- x[!missing]
 x.obs
@@ -290,7 +294,10 @@ imputed
 ### Running function on a vector
 
 ```{r}
-random.imp(x)
+imp <- random.imp(x)
+plot(density(imp[indNA]), main = "Observed and imputed values", xlab = "x")
+lines(density(imp[which(!((1:nrow(array(x))) %in% indNA))]), col = "red")
+legend("topleft",text.col = c("black","red"),legend = c(" Imputation","Observed values"))
 ```
 
 ### Running function on 1st interval of `actbycol2`
