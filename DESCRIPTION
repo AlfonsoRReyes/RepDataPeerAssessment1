@@ -11,7 +11,10 @@ Encoding: UTF-8
 LazyData: true
 Imports:
     lattice,
-    mice
+    mice,
+    magrittr,
+    ggplot2,
+    reshape2
 Suggests: 
     knitr,
     rmarkdown
