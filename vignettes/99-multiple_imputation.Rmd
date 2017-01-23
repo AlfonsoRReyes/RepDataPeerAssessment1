@@ -53,12 +53,19 @@ library(RepDataPeerAssessment1)
 
 data(activity)
 
+```
+
+### Renaming `steps` as `values`
+```{r}
 #activity$interval <- as.factor(activity$interval)
 names(activity) <- c("value", "date", "interval")
 actbycol <- cast(activity, date ~ interval)
 ```
 
-
+### Keeping original variable names
+```{r}
+actbycol <- cast(activity, date ~ interval, value = "steps")
+```
 
 
 ```{r results='hold'}
@@ -304,24 +311,33 @@ legend("topleft",text.col = c("black","red"),legend = c(" Imputation","Observed 
 
 ```{r}
 x0
-random.imp(x0)
+imp <- random.imp(x0)      # impute random values
+indNA <- which(is.na(x0))   # which rows are NA
+
+plot(density(imp[indNA]), 
+     main = "Observed and imputed values", 
+     xlab = "x0")
+lines(density(imp[which(!((1:nrow(array(x0))) %in% indNA))]), col = "red")
+legend("topright",text.col = c("black","red"),legend = c(" Imputation","Observed values"))
 ```
 
 ```{r}
 actbycol2[splice$rows, splice$cols-1]
 ```
 
+### replaced by random values
 ```{r}
 actbycol.rep <- random.imp(actbycol2[, 1:10])
 ```
 
 ```{r}
-actbycol2[splice$rows, splice$cols-1]
+actbycol.rep[splice$rows, 1:10]
 ```
 
 ### numerical dataframe with replaced random values
 
 ```{r}
+summary(actbycol2)
 actbycol.imp <- random.imp(actbycol2)    
 actbycol.imp[splice$rows, splice$cols-1]
 ```
@@ -343,6 +359,99 @@ hist(subset(actbycol.imp.melt, actbycol.imp.melt$steps > 0)$steps)
 #hist(actbycol.imp.melt$steps)
 ```
 
+```{r}
+dim(activity)
+dim(actbycol.imp.melt)
+```
+
+## Imputing random values and density plot
+
+```{r}
+data("activity")
+# convert interval variable to multiple columns
+actbycol <- cast(activity, date ~ interval, value = "steps")
+
+# imputting random values
+actbycol.imp <- random.imp(actbycol[2:289]) 
+
+# rebuild to interval to one column
+date <- actbycol[, 1]                       # get the date
+actbycol.bind <- cbind(date, actbycol.imp)  # merge 288 cols with date
+actbycol.imp.melt <- melt(actbycol.bind, id = "date")  # go back to long df
+names(actbycol.imp.melt) <- c("date", "interval", "steps")  # rename vars
+
+# prepare for plotting
+imp <- actbycol.imp.melt                    # the imputted data frame
+indVar <- "steps"                           # variable for plotting
+indNA <- which(is.na(activity[, indVar]))   # which rows are NA
+indNA.not <- which(!((1:nrow(activity)) %in% indNA))
+                  
+plot(density(imp[indNA, indVar]), 
+     main = "Observed and imputed values", 
+     xlab = "steps")
+lines(density(imp[indNA.not, indVar]), 
+      col = "red")
+legend("topright",text.col = c("black","red"),legend = c(" Imputation","Observed values"))
+
+```
+
+### Summary
+```{r}
+info.ints <- data.frame(rows = nrow(imp), 
+                   cols = ncol(imp),
+                   min = min(imp[, indVar]),
+                   max = max(imp[, indVar]),
+                   NAs.before = length(indNA),
+                   NAs.after = length(indNA.not)
+                   )
+          
+info.dbls <- data.frame(median = median(imp[, indVar]),
+                        mean = mean(imp[, indVar]),
+                   sd = sd(imp[, indVar]),
+                   ses= sd(imp[, indVar]) / 
+                     sqrt(sum(!is.na(imp[, indVar])))
+                   )
+info.ints <- t(info.ints)
+info.dbls <- t(info.dbls)
+info.ints
+info.dbls
+```
+### Normalized variables `steps`
+```{r}
+y <- imp$steps
+y.sig <- sd(y)
+y.mu <- mean(y)
+y.norm <- (y - y.mu) / y.sig
+min(y.norm)
+max(y.norm)
+```
+
+### Normalized `row-index`
+```{r}
+x <- seq(1:nrow(imp))
+x.sig <- sd(x)
+x.mu <- mean(x)
+x.norm <- (x - x.mu) / x.sig
+min(x.norm)
+max(x.norm)
+```
+
+### Plot `x` vs `y` of random imputting
+```{r fig.asp=1}
+# find NA and not NA row-indexes
+indVar <- "steps"
+indNA <- which(is.na(activity[, indVar]))   # which rows are NA
+indNA.not <- which(!((1:nrow(activity)) %in% indNA))
+
+# plot row-index vs steps
+plot(x.norm[indNA.not], y.norm[indNA.not], 
+     main = "index vs steps",
+     xlab = "x",
+     ylab = "y"
+     )
+points(x.norm[indNA], y.norm[indNA], col = "red")
+```
+
 
 ## Mean Imputation
 ```{r}
@@ -350,12 +459,9 @@ hist(subset(actbycol.imp.melt, actbycol.imp.melt$steps > 0)$steps)
 names(activity) <- c("steps",    "date",     "interval")
 ```
 
+
 ```{r}
 library(RepDataPeerAssessment1)
-```
-
-
-```{r}
 library(lattice)
 library(mice)
 
@@ -366,9 +472,7 @@ activity.nodate <- activity[, c(1, 3)]
 ### impute the mean
 #imp <- mice(activity.nodate, method="mean", m=1, maxit=1)
 imp <- mice(activity.nodate, method="mean", m=1, maxit=1)
-```
 
-```{r}
 ### Figure 1.1
 lwd <- 1.5
 # par(mfrow=c(1,2))
@@ -400,9 +504,10 @@ matplot(x, y, type="s",
 
 ```
 
+### Plot `interval` vs `steps` for mean imputting
 ```{r fig.asp=1}
 tp <- xyplot(imp, steps~interval, 
-             na.groups = ici(imp), 
+             na.groups = ici(imp),
              ylab ="steps", xlab="interval",
        cex = 0.75, 
        
