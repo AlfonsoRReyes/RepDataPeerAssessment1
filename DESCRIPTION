@@ -9,7 +9,14 @@ Description: Intention is to get more acquinted with developing R packages.
 License: CC0
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 5.0.1
-Suggests: knitr,
+Imports:
+    lattice,
+    mice,
+    magrittr,
+    ggplot2,
+    reshape2
+Suggests: 
+    knitr,
     rmarkdown
 VignetteBuilder: knitr
+RoxygenNote: 5.0.1
