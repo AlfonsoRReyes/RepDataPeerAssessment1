@@ -1,4 +1,4 @@
-utils::suppressForeignCheck(c("x.values", "y.values", "value", "."))
+# utils::suppressForeignCheck(c("x.values", "y.values", "value", "."))
 
 
 
@@ -114,15 +114,14 @@ nas.plot.frequency <- function(df, na.var, step = 30, ylim = 0) {
 #'
 #' @param x data.frame
 #'
-#' @import magrittr
-#' @import ggplot2
-#' @import reshape2
+#' @importFrom magrittr %>%
+#' @importFrom ggplot2 aes geom_raster ggplot theme_minimal
+#' scale_fill_grey theme labs element_text
+#' @importFrom reshape2 melt
+#'
 #' @export
 #'
 ggplot_missing <- function(x){
-
-  # library(reshape2)
-  # library(ggplot2)
 
   x %>%
     is.na %>%
