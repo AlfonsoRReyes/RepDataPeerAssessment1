@@ -102,13 +102,6 @@ nas.plot.frequency <- function(df, na.var, step = 30, ylim = 0) {
 
 
 
-# ## Put this in the same source file (to remind you that you did it) add:
-# if(getRversion() >= "2.15.1")  utils::globalVariables(
-#   # needed by function ggplot_missing()
-#   c("x.values", "y.values", ".", "value"
-#   )
-# )
-
 #' A function that plots missingness.
 #'    Works only for dataframes with more than 1 variable
 #'
@@ -116,7 +109,7 @@ nas.plot.frequency <- function(df, na.var, step = 30, ylim = 0) {
 #'
 #' @importFrom magrittr %>%
 #' @importFrom ggplot2 aes geom_raster ggplot theme_minimal
-#' scale_fill_grey theme labs element_text
+#'             scale_fill_grey theme labs element_text
 #' @importFrom reshape2 melt
 #'
 #' @export
