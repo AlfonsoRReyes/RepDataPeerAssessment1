@@ -3,6 +3,8 @@ title: "dealing with missing data"
 output: html_notebook
 ---
 
+## Using own package
+
 ```{r}
 library(RepDataPeerAssessment1)
 
@@ -10,26 +12,17 @@ data("activity")
 head(activity)
 ```
 
-```{r}
-
-```
 
 ```{r}
-activity
-```
-
-
-
-```{r}
-x0 <- activity$steps
-summary(x0)
+steps <- activity$steps
+summary(steps)
 ```
 
 We have 2304 NA's.
 
 How important is it?
 ```{r}
-mean(is.na(x0))
+mean(is.na(steps))
 ```
 
 We have 13% of missing values.
@@ -49,9 +42,40 @@ filter(activity) %>%
   summarize(zeros = mean(steps != 0, na.rm = TRUE))
 ```
 
-```{r}
+## Where our data lies
+Source: http://thomasleeper.com/Rcourse/Tutorials/NAhandling.html
 
+Analyze a vector or variable of the dataframe:
+```{r}
+length(steps[is.na(steps) == TRUE])     # number of NAs
 ```
+
+Analyze for NAs in a the whole dataframe:
+```{r}
+head(is.na(activity))
+length(steps[is.na(steps) == FALSE])     # number of non-NAs
+```
+
+### Visualizing missing data in a plot
+```{r, fig.asp=1}
+image(is.na(activity),
+      xaxt = "n",         # suppress plotting of x axis
+      yaxt = "n",         # suppress plotting of y axis
+      bty = "n"           # do not draw a box around
+      )
+
+# custom labels for x and y axis
+axis(1, seq(0, 1, length.out = nrow(activity)), 1:nrow(activity), col = "white")
+axis(2,                 # y axis
+     c(0, 0.5, 1),      # sequence of labels
+     names(activity),   # variables names of data frame
+     col = "white",     # color
+     las = 2)           # 2: perpendicular to the axis. Defaults = 0
+
+box(lty = '1373', col = 'black')    # draw a box around
+```
+
+
 
 
 
@@ -86,4 +110,6 @@ tail(df)
 ```
 
 In the first example, we identify elements of y that are NA, and replace them with the mean, if so. In the second, we test each element of y; if it is NA, we replace with the mean, otherwise we replace with the original value. 
+
+
 

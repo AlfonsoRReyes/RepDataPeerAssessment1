@@ -30,6 +30,11 @@ actbycol <- cast(activity, date ~ interval)
 ```
 
 ```{r}
+head(actbycol)
+```
+
+
+```{r}
 view(actbycol)
 ```
 

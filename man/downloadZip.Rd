@@ -15,6 +15,6 @@ downloadZip(fileUrl, outDir = "./data")
 None
 }
 \description{
-Downloads a zip file, unpacks it on selected folder
+By default, if not indicated, the file will download in ./data.
 }
 
