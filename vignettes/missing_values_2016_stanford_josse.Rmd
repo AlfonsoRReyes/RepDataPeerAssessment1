@@ -14,28 +14,34 @@ install.packages(c("VIM", "FactoMineR", "missMDA", "missForest", "norm"))
 #### Ozone data set
 ###############################
 
-ozo <- read.table("http://juliejosse.com/wp-content/uploads/2016/06/ozoneNA.csv",header=TRUE,sep=",",row.names=1)
+ozo <- read.table("http://juliejosse.com/wp-content/uploads/2016/06/ozoneNA.csv", 
+                  header=TRUE, 
+                  sep=",",row.names=1)
+
 WindDirection <- ozo[,12]
 don <- ozo[,1:11]   #### keep the continuous variables
 summary(don)
 head(don)
 dim(don)
 
-######################################################
-#### Visualization of the pattern of missing values
-######################################################
 ```
 
 ```{r}
+######################################################
+#### Visualization of the pattern of missing values
+######################################################
+
 library(VIM)
-res<-summary(aggr(don, sortVar=TRUE))$combinations
+res <-summary(aggr(don, sortVar=TRUE))$combinations
 res[rev(order(res[,2])),]
 
 aggr(don, sortVar=TRUE)
 
 matrixplot(don,sortby=2) # marche pas sur Rstudio
 marginplot(don[,c("T9","maxO3")])
+```
 
+```{r}
 # Creation of a categorical data set with "o" when observed and "m" when missing
  mis.ind <- matrix("o", nrow = nrow(don), ncol = ncol(don))
  mis.ind[is.na(don)] = "m"
@@ -67,10 +73,11 @@ res.comp <- imputePCA(don, ncp = 2)
 res.comp$completeObs[1:3, ]
  
 indvar <- "T9"
-indNA <- which(is.na(don[,indvar]))
-plot(density(res.comp$completeObs[indNA, indvar]), 
-     main = "Observed and imputed values for T9", xlab = "T9")
-lines(density(res.comp$completeObs[which(!((1:nrow(don))%in%indNA)),indvar]),col = "red")
+indNA <- which(is.na(don[,indvar]))  # get rows that are NA
+plot(density(res.comp$completeObs[indNA, indvar]),  # plot imputed data
+     main = "Observed and imputed values for T9", 
+     xlab = "T9")
+lines(density(res.comp$completeObs[which(!((1:nrow(don))%in%indNA)),indvar]),col = "red")                                              # plot observations 
 legend("topleft",text.col = c("black","red"),legend = c(" Imputation","Observed values"))
 
 #Performing a PCA on the completed data set
@@ -139,6 +146,7 @@ plot(res.mfa, select="IEEE/ACM Transactions on Networking",  partial="all", habi
 ```
 
 ```{r}
+par(ask=F)
 #####################################
 ######## Multiple Imputation ########
 #####################################
@@ -175,7 +183,7 @@ resultmice <- summary(pool.mice)
 # pool mipca
 imp<-prelim(res.mi = res.MIPCA, X = don) #creating a mids object
 fit <- with(data=imp,exp=lm(maxO3~T9+T12+T15+Ne9+Ne12+Ne15+Vx9+Vx12+Vx15+maxO3v))
-res.pool < -pool(fit)
+res.pool <-pool(fit)
 summary(res.pool)
   
  #pool Amelia
