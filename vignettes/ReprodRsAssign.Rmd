@@ -100,7 +100,7 @@ str(activity)
 summary(activity)
 ```
 
-#### Convert variable `date` as.factor to `as.date`
+** Convert variable `date` as.factor to `as.date` **
 
 ```{r}
 activity$date <- as.Date(activity$date)
@@ -117,11 +117,11 @@ We will ignore the NAs in this part of the assignment.
 # get only observations that are not NA
 complete <- complete.cases(activity)
 activity.cases <- activity[complete, ]
+dim(activity.cases)
 ```
 
 
 #### Histogram of total number of steps each day
-
 
 ```{r}
 hist(activity.cases$steps, breaks = 30)
@@ -144,7 +144,7 @@ We want to know how many unique intervals there are because we will need later t
 ```{r}
 unique(activity.cases$interval)
 ```
-So, there are `r length(unique(activity.cases$interval))` **unique** intervals.
+So, there are `r length(unique(activity.cases$interval))` **unique** intervals, with the first interval being `r min(activity.cases$interval)` and the last `r max(activity.cases$interval)`.
 
 -----
 
@@ -152,9 +152,6 @@ So, there are `r length(unique(activity.cases$interval))` **unique** intervals.
 
 ### 1. Make a time series plot (i.e. type = "l") 
 Make a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis)
-
-
-
 
 
 
