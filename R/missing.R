@@ -1,3 +1,7 @@
+utils::suppressForeignCheck(c("x.values", "y.values", "value", "."))
+
+
+
 #' Gets the number of NAs
 #'
 #' @param x vector
@@ -94,5 +98,44 @@ nas.plot.frequency <- function(df, na.var, step = 30, ylim = 0) {
 
   list(breaks = breaks, obs = obs, mis = mis, max = max, min = min, len_obs = length(obs), len_mis = length(mis))
 
+}
+
+
+
+# ## Put this in the same source file (to remind you that you did it) add:
+# if(getRversion() >= "2.15.1")  utils::globalVariables(
+#   # needed by function ggplot_missing()
+#   c("x.values", "y.values", ".", "value"
+#   )
+# )
+
+#' A function that plots missingness.
+#'    Works only for dataframes with more than 1 variable
+#'
+#' @param x data.frame
+#'
+#' @import magrittr
+#' @import ggplot2
+#' @import reshape2
+#' @export
+#'
+ggplot_missing <- function(x){
+
+  # library(reshape2)
+  # library(ggplot2)
+
+  x %>%
+    is.na %>%
+    melt %>%
+    ggplot(data = .,
+           aes(x = Var2,
+               y = Var1)) +
+    geom_raster(aes(fill = value)) +
+    scale_fill_grey(name = "",
+                    labels = c("Present","Missing")) +
+    theme_minimal() +
+    theme(axis.text.x  = element_text(angle=45, vjust=0.5)) +
+    labs(x = "Variables in Dataset",
+         y = "Rows / observations")
 }
 
