@@ -1,6 +1,3 @@
-# utils::suppressForeignCheck(c("x.values", "y.values", "value", "."))
-
-
 
 #' Gets the number of NAs
 #'
