@@ -236,6 +236,7 @@ hist(activity$value)
 activity.nonzero <- subset(activity, activity$value > 0)
 hist(activity.nonzero$value)
 ```
+
 ### Histogram of activity restored from cast() 
 ```{r}
 actbycol.melt <- melt(actbycol, id = "date")
@@ -340,6 +341,10 @@ hist(subset(actbycol.imp.melt, actbycol.imp.melt$steps > 0)$steps)
 ```{r}
 # activity$interval <- as.numeric(activity$interval)
 names(activity) <- c("steps",    "date",     "interval")
+```
+
+```{r}
+library(RepDataPeerAssessment1)
 ```
 
 
@@ -493,7 +498,7 @@ locf <- function(x) {
   firstNonNA <- min(NonNAindex)   # get the lower index or 1st non-NA
   a <- x[firstNonNA]              # assign 1st non-NA observation to pivot
   
-  for (i in 1:length(x)) {        # count from the 2nd to the end of the vector
+  for (i in 1:length(x)) {        # count from the 1st to the end of the vector
     if (is.na(x[i])) x[i] <- a    # if current element is NA, then make it as pivot
     else a <- x[i]                # else make pivot same as ith
   }
@@ -501,6 +506,7 @@ locf <- function(x) {
 }
 
 Sti <- locf(St)
+length(Sti)
 nas.count(Sti)
 colvec <- ifelse(is.na(St), mdc(2), mdc(1))
 
@@ -518,13 +524,41 @@ points(Sti[1:limRow], col = colvec, pch=20, cex=1)
 ```
 
 ```{r}
-### Figure 1.4
+LOCF <- function(x) {
+    # Last Observation Carried Forward (for a left to right series)
+    LOCF <- max(which(!is.na(x))) # the location of the Last Observation to Carry Forward
+    x[LOCF:length(x)] <- x[LOCF]
+    return(x)
+}
 
-library(zoo)
+Sti <- LOCF(St)
+length(Sti)
+nas.count(Sti)
 
-St <- activity$steps
+par(mfrow=c(1,1))
+limRow <- 17568
+
+colvec <- ifelse(is.na(St), mdc(2), mdc(1))    # missing data coloring (Mdc)
+
+plot(Sti[1:limRow], 
+     col = colvec, 
+     type="l", 
+     xlab="Observation", 
+     ylab="Steps")
+
+points(Sti[1:limRow], col = colvec, pch=20, cex=1)
+```
+
+
+```{r}
+na.locf <- function(x) {
+  v <- !is.na(x)
+  c(NA, x[v])[cumsum(v)+1]
+}
 
 Sti <- na.locf(St)
+length(Sti)
+
 nas.count(Sti)
 par(mfrow=c(1,1))
 limRow <- 12000
@@ -538,6 +572,111 @@ plot(Sti[1:limRow],
      ylab="Steps")
 
 points(Sti[1:limRow], col = colvec, pch=20, cex=1)
+
+```
+
+
+```{r}
+### Figure 1.4
+
+library(zoo)
+
+St <- activity$steps
+
+# Sti <- na.locf(St)
+bz <- zoo(St)
+length(bz)
+Sti <- zoo::na.locf(bz)
+length(Sti)
+
+nas.count(Sti)
+par(mfrow=c(1,1))
+limRow <- length(Sti)
+
+colvec <- ifelse(is.na(St), mdc(2), mdc(1))    # missing data coloring (Mdc)
+
+plot(Sti[1:limRow], 
+     col = colvec, 
+     type="l", 
+     xlab="Observation", 
+     ylab="Steps")
+
+points(Sti[1:limRow], col = colvec, pch=20, cex=1)
+```
+
+```{r}
+mean(St, na.rm = TRUE)
+```
+
+```{r}
+# Standard Error of only the elements that are not NA
+sum(!is.na(St))
+sd(St, na.rm = TRUE) / sqrt(sum(!is.na(St)))
+```
+
+```{r}
+mean(Sti, na.rm = TRUE)
+```
+
+```{r}
+# Standard Error of only the elements that are not NA
+sum(!is.na(Sti))
+sd(Sti, na.rm = TRUE) / sqrt(sum(!is.na(Sti)))
+```
+
+## Applying LOCF to a transposed data.frame
+
+```{r}
+library(reshape)
+library(RepDataPeerAssessment1)
+
+data(activity)
+
+#activity$interval <- as.factor(activity$interval)
+names(activity) <- c("value", "date", "interval")
+actbycol <- cast(activity, date ~ interval)
+
+actbycol.nodate <- actbycol[, 2:289]    # remove the date column for now
+
+```
+
+
+```{r}
+act <- sapply(actbycol.nodate, zoo::na.locf)    # apply LOCF to numerical intervals
+df <- data.frame(act)       # create data frame
+names(df) <- colnames(act)  # rename
+
+# rebuild to old activity structure
+actbycol.shifted <- actbycol[2:61, 1]       # get only the date column but not row #1
+actbycol.new <- cbind(actbycol.shifted, df)
+
+#rownames(actbycol.new) <- NULL
+```
+
+```{r}
+names(actbycol.new)[1] <- "date"
+```
+
+
+```{r}
+activity.new <- melt(actbycol.new, id = "date")    # melt DF as original
+names(activity.new) <- c("date", "interval", "steps")  # rename vars
+
+```
+
+```{r}
+mean(activity.new$steps)
+```
+
+```{r}
+sd(activity.new$steps) / sqrt(sum(!is.na(activity.new$steps)))
+```
+This number is not better than the one we obtained by doing the LOFC replacement in the whole steps column above.
+
+
+
+```{r}
+ggplot_missing(activity)
 ```
 
 
