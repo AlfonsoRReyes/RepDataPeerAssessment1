@@ -153,10 +153,10 @@ So, there are `r length(unique(activity.cases$interval))` **unique** intervals, 
 ### 1. Make a time series plot (i.e. type = "l") 
 Make a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis)
 
-
-
 ```{r}
-byDate.steps.mean <- aggregate(activity.cases$steps, by = list(activity.cases$date), mean)
+byDate.steps.mean <- aggregate(activity.cases$steps, 
+                               by = list(activity.cases$date), mean)
+
 # rename the variable to something meaningful
 names(byDate.steps.mean) <- c("Day", "mean.steps")
 plot(byDate.steps.mean$Day, byDate.steps.mean$mean.steps, type = "l")
@@ -166,7 +166,6 @@ plot(byDate.steps.mean$Day, byDate.steps.mean$mean.steps, type = "l")
 Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?
 
 #### Find day and interval with maximum number of steps
-Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?
 
 Let's find the maximum number of steps:
 ```{r}
@@ -210,7 +209,8 @@ plot(sorted$interval, sorted$steps.max,
      panel.first = grid(lty = 1))
 ```
 
-What we can confirm is that the maximum activity occurs between **500 and 2000** intervals.
+What we can confirm is that the maximum activity occurs between the **500 and 2000** intervals.
+
 
 ## D. Imputing missing values
 
@@ -226,6 +226,13 @@ nrow(activity.missing)
 
 ### 2. Complete missing values
 Devise a strategy for filling in all of the missing values in the dataset. The strategy does not need to be sophisticated. For example, you could use the mean/median for that day, or the mean for that 5-minute interval, etc.
+
+There are several ways we can complete the missing values. 
+
+
+
+
+
 
 ### 3. Create dataset with missing values filled in
 Create a new dataset that is equal to the original dataset but with the missing data filled in.
