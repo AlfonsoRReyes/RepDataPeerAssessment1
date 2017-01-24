@@ -7,6 +7,8 @@
 #' @param colName name of the column in the report table
 #' @param decs number of decimals. Default is 3.
 #'
+#' @return data frame with one column
+#'
 #' @importFrom stats median sd
 #'
 #' @export

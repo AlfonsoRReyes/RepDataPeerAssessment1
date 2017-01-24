@@ -15,6 +15,9 @@ info.imp(x, uniVar, colName, decs = 3)
 
 \item{decs}{number of decimals. Default is 3.}
 }
+\value{
+data frame with one column
+}
 \description{
 It could be before or after imputation
 }
