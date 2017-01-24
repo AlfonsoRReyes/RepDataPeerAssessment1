@@ -385,6 +385,10 @@ actbycol.bind <- cbind(date, actbycol.imp)  # merge 288 cols with date
 actbycol.imp.melt <- melt(actbycol.bind, id = "date")  # go back to long df
 names(actbycol.imp.melt) <- c("date", "interval", "steps")  # rename vars
 
+# order by date
+actbycol.imp.melt <- actbycol.imp.melt[order(actbycol.imp.melt$date), ]
+
+# convert interval to numeric
 actbycol.imp.melt$interval <- as.numeric(as.character(actbycol.imp.melt$interval))
 
 str(actbycol.imp.melt)
@@ -497,11 +501,6 @@ points(x.norm[indNA], y.norm[indNA], col = col[2])
 
 
 ## Mean Imputation
-```{r}
-# activity$interval <- as.numeric(activity$interval)
-names(activity) <- c("steps",    "date",     "interval")
-```
-
 
 ```{r}
 library(RepDataPeerAssessment1)
@@ -602,7 +601,7 @@ summary(steps); dim(steps)
 ```
 
 
-```{r}
+```{r fig.asp=1}
 library(mice)
 
 y <- steps
