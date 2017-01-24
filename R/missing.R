@@ -128,3 +128,22 @@ ggplot_missing <- function(x){
          y = "Rows / observations")
 }
 
+#' Assigns a random value to a vector
+#'
+#' The random values are sampled from the completed cases.
+#'
+#' @param a is a vector of completed and NA observations
+#' @return a completed vector with random values
+#' @export
+#'
+random.imp <- function (a){
+  missing <- is.na(a)        # logical vector. TRUE for NAs
+  n.missing <- sum(missing)  # number of missing values
+  a.obs <- a[!missing]       # vector of GOOD values
+  imputed <- a               # copy of original vector
+
+  # Take a sample from GOOD part of the vector and replace missing elements
+  imputed[missing] <- sample (a.obs, n.missing, replace=TRUE)
+  return (imputed)           # return complete vector
+}
+
