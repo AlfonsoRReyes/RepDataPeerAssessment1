@@ -120,6 +120,10 @@ activity.cases <- activity[complete, ]
 dim(activity.cases)
 ```
 
+```{r fig.asp=1}
+plot(seq(1:nrow(activity.cases)), activity.cases$steps)
+```
+
 
 #### Histogram of total number of steps each day
 
@@ -194,6 +198,12 @@ head(sorted)
 
 #### Find what are the intervals with more activity
 We will plot the number maximum of steps in logarithmic scale:
+
+```{r}
+plot(sorted$interval, sorted$steps.max,
+     xlim = c(0, 2500), ylim = range(1:1000),
+     panel.first = grid(lty = 1))
+```
 
 ```{r}
 plot(sorted$interval, sorted$steps.max, log = "y",
