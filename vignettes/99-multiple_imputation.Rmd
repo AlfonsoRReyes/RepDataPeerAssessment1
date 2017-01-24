@@ -485,28 +485,7 @@ round(info.dbls, 3)
 ```
 
 ```{r}
-info.imp <- function(x, uniVar, colName, decs = 3) {
-  if (anyNA(x[, uniVar])) {
-    indNA <- which(is.na(x[, uniVar]))             # which rows are NA
-    indNA.not <- which(!((1:nrow(x)) %in% indNA))  # which rows are not NA
-    count.NA <- length(indNA)
-    
-    x <- x[indNA.not, ]    # get the observations only; not NAs
-    
-  }
-  
-  tmp <- data.frame(nrows = nrow(x), 
-                    median = median(x[, uniVar]),
-                    mean = mean(x[, uniVar]),
-                    sd = sd(x[, uniVar]),
-                    ses = sd(x[, uniVar]) / sqrt(sum(!is.na(x[, uniVar])))
-                   )
-  tmp <- data.frame(round(t(tmp), decs))
-  names(tmp) <- colName
-  return(tmp)
-  
-  
-}
+library(RepDataPeerAssessment1)
 
 # get information before imputing data
 df1 <- info.imp(activity, indVar, "Before", 2)
