@@ -426,23 +426,7 @@ tp
 ```
 
 ```{r}
-imp.df2 <- imp.df[, c("interval", "steps")]
 
-tmp <- do.call(data.frame,
-               list(rows = nrow(imp.df2),
-                    NAs = length(indNA),
-                    Obs = length(indNA.not),
-                    mean = apply(imp.df2, 2, mean),
-                    median = apply(imp.df2, 2, median),
-                    
-                    min = apply(imp.df2, 2, min),
-                    max = apply(imp.df2, 2, max),
-                    sd = apply(imp.df2, 2, sd),
-                    ses = apply(imp.df2, 2, function(x) sd(x) )
-                    )
-               )
-tmp <- tmp[rownames(tmp) != "interval", ]
-tmp
 ```
 
 
