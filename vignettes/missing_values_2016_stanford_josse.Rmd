@@ -1,10 +1,12 @@
 ---
 title: "R Notebook"
-output: html_notebook
+output:
+  html_document: default
+  html_notebook: default
 ---
 
 ```{r}
-install.packages(c("VIM", "FactoMineR", "missMDA", "missForest", "norm"))
+# install.packages(c("VIM", "FactoMineR", "missMDA", "missForest", "norm"))
 ```
 
 
