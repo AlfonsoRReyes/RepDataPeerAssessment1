@@ -563,6 +563,13 @@ tp
 
 
 ```{r}
+
+
+```
+
+
+```{r fig.asp=1}
+
 # find NA and not NA row-indexes
 indVar <- "steps"
 indNA <- which(is.na(activity[, indVar]))            # which rows are NA
@@ -571,16 +578,9 @@ indNA.not <- which(!((1:nrow(activity)) %in% indNA)) # rows that are not NA
 steps.imp <- imp$imp$steps$`1`   # all imputed values ONLY; no observations
 steps <- activity$steps          # obs + NAs
 
-summary(steps); dim(steps)
-
+# summary(steps); dim(steps)
 steps[indNA] <- steps.imp        # replace the NAs with imputed values
-
-summary(steps); dim(steps)
-
-```
-
-
-```{r fig.asp=1}
+# summary(steps); dim(steps)
 
 
 y <- steps
@@ -881,8 +881,5 @@ This number is not better than the one we obtained by doing the LOFC replacement
 
 
 
-```{r}
-ggplot_missing(activity)
-```
 
 
