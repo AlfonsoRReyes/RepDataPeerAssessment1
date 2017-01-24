@@ -425,6 +425,26 @@ tp <- xyplot(steps~interval, data = imp.df,
 tp
 ```
 
+```{r}
+imp.df2 <- imp.df[, c("interval", "steps")]
+
+tmp <- do.call(data.frame,
+               list(rows = nrow(imp.df2),
+                    NAs = length(indNA),
+                    Obs = length(indNA.not),
+                    mean = apply(imp.df2, 2, mean),
+                    median = apply(imp.df2, 2, median),
+                    
+                    min = apply(imp.df2, 2, min),
+                    max = apply(imp.df2, 2, max),
+                    sd = apply(imp.df2, 2, sd),
+                    ses = apply(imp.df2, 2, function(x) sd(x) )
+                    )
+               )
+tmp <- tmp[rownames(tmp) != "interval", ]
+tmp
+```
+
 
 ### Summary
 ```{r}
@@ -438,14 +458,14 @@ info.ints <- data.frame(rows = nrow(imp.df),
           
 info.dbls <- data.frame(median = median(imp.df[, indVar]),
                         mean = mean(imp.df[, indVar]),
-                   sd = sd(imp.df[, indVar]),
-                   ses= sd(imp.df[, indVar]) / 
-                     sqrt(sum(!is.na(imp.df[, indVar])))
+                        sd = sd(imp.df[, indVar]),
+                        ses = sd(imp.df[, indVar]) / 
+                                  sqrt(sum(!is.na(imp.df[, indVar])))
                    )
 info.ints <- t(info.ints)
 info.dbls <- t(info.dbls)
 info.ints
-info.dbls
+round(info.dbls, 3)
 ```
 
 ### Normalized variables `steps` and  `row-index`
@@ -560,11 +580,6 @@ tp <- xyplot(imp, steps~interval,
 tp
 ```
 
-
-```{r}
-
-
-```
 
 
 ```{r fig.asp=1}
