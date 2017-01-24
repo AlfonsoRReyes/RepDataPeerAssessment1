@@ -367,7 +367,12 @@ dim(actbycol.imp.melt)
 ## Imputing random values and density plot
 
 ```{r}
+library(reshape)
+library(lattice)
+
+# load the data
 data("activity")
+
 # convert interval variable to multiple columns
 actbycol <- cast(activity, date ~ interval, value = "steps")
 
@@ -380,20 +385,43 @@ actbycol.bind <- cbind(date, actbycol.imp)  # merge 288 cols with date
 actbycol.imp.melt <- melt(actbycol.bind, id = "date")  # go back to long df
 names(actbycol.imp.melt) <- c("date", "interval", "steps")  # rename vars
 
+actbycol.imp.melt$interval <- as.numeric(as.character(actbycol.imp.melt$interval))
+
+str(actbycol.imp.melt)
+
 # prepare for plotting
-imp <- actbycol.imp.melt                    # the imputted data frame
+imp.df <- actbycol.imp.melt                    # the imputted data frame
 indVar <- "steps"                           # variable for plotting
 indNA <- which(is.na(activity[, indVar]))   # which rows are NA
 indNA.not <- which(!((1:nrow(activity)) %in% indNA))
                   
-plot(density(imp[indNA, indVar]), 
+plot(density(imp.df[indNA, indVar]), 
      main = "Observed and imputed values", 
      xlab = "steps")
-lines(density(imp[indNA.not, indVar]), 
+lines(density(imp.df[indNA.not, indVar]), 
       col = "red")
 legend("topright",text.col = c("black","red"),legend = c(" Imputation","Observed values"))
 
 ```
+
+```{r}
+library(mice)
+lwd <- 1.5
+data <- imp.df[, c("steps", "interval")]
+tp <- xyplot(steps~interval, data = imp.df,
+             na.groups = ici(imp.df),
+             ylab ="steps", xlab="interval",
+       cex = 0.75, 
+       xlim = c(0, 2355),
+       
+       lex=lwd
+       #ylim = c(0, 900), 
+       #xlim = c(0, 500))
+)
+#print(tp, newpage = FALSE, position = c(0.48,0.08,1,0.92))
+tp
+```
+
 
 ### Summary
 ```{r}
@@ -416,7 +444,7 @@ info.dbls <- t(info.dbls)
 info.ints
 info.dbls
 ```
-### Normalized variables `steps`
+### Normalized variables `steps` and  `row-index`
 ```{r}
 y <- imp$steps
 y.sig <- sd(y)
@@ -424,10 +452,7 @@ y.mu <- mean(y)
 y.norm <- (y - y.mu) / y.sig
 min(y.norm)
 max(y.norm)
-```
 
-### Normalized `row-index`
-```{r}
 x <- seq(1:nrow(imp))
 x.sig <- sd(x)
 x.mu <- mean(x)
@@ -436,7 +461,21 @@ min(x.norm)
 max(x.norm)
 ```
 
-### Plot `x` vs `y` of random imputting
+### Normalized interval (optional)
+This has the disadvantage of showing discontinuities along the x-axis since the interval is no n contiguous jumping in steps of 5.
+
+```{r}
+x <- imp$interval
+x.sig <- sd(x)
+x.mu <- mean(x)
+x.norm <- (x - x.mu) / x.sig
+min(x.norm)
+max(x.norm)
+```
+
+### Normalized plot `x` vs `y` of random imputting
+Normalizing the row-index should be the prefferred option to avoid showing gap along the x-axis.
+
 ```{r fig.asp=1}
 # find NA and not NA row-indexes
 indVar <- "steps"
@@ -444,12 +483,15 @@ indNA <- which(is.na(activity[, indVar]))   # which rows are NA
 indNA.not <- which(!((1:nrow(activity)) %in% indNA))
 
 # plot row-index vs steps
+col <- c(mdc(4),mdc(5))
+
 plot(x.norm[indNA.not], y.norm[indNA.not], 
      main = "index vs steps",
      xlab = "x",
-     ylab = "y"
+     ylab = "y",
+     col = col[1]
      )
-points(x.norm[indNA], y.norm[indNA], col = "red")
+points(x.norm[indNA], y.norm[indNA], col = col[2])
 ```
 
 
@@ -517,6 +559,79 @@ tp <- xyplot(imp, steps~interval,
 )
 #print(tp, newpage = FALSE, position = c(0.48,0.08,1,0.92))
 tp
+```
+
+```{r fig.asp=1}
+
+# find NA and not NA row-indexes
+indVar <- "steps"
+indNA <- which(is.na(activity[, indVar]))   # which rows are NA
+indNA.not <- which(!((1:nrow(activity)) %in% indNA))
+
+y.imp <- imp$imp$steps
+summary(y.imp)
+dim(y.imp)
+class(y.imp)
+names(y.imp) <- "steps"
+
+y.obs <- data.frame(imp$data$steps[indNA.not])
+summary(y.obs)
+dim(y.obs)
+names(y.obs) <- "steps"
+
+y <- rbind(y.imp, y.obs)
+summary(y)
+dim(y)
+y <- y$steps
+summary(y)
+```
+
+```{r}
+# find NA and not NA row-indexes
+indVar <- "steps"
+indNA <- which(is.na(activity[, indVar]))   # which rows are NA
+indNA.not <- which(!((1:nrow(activity)) %in% indNA)) # rows that are not NA
+
+steps.imp <- imp$imp$steps$`1`   # all imputed values
+steps <- activity$steps          # obs + NAs
+summary(steps); dim(steps)
+steps[indNA] <- steps.imp        # replace the NAs with imputed values
+summary(steps); dim(steps)
+
+```
+
+
+```{r}
+library(mice)
+
+y <- steps
+y.sig <- sd(y)
+y.mu <- mean(y)
+y.norm <- (y - y.mu) / y.sig
+min(y.norm)
+max(y.norm)
+
+x <- seq(1:nrow(activity))
+x.sig <- sd(x)
+x.mu <- mean(x)
+x.norm <- (x - x.mu) / x.sig
+min(x.norm)
+max(x.norm)
+
+
+
+# plot row-index vs steps
+col <- c(mdc(4),mdc(5))
+
+plot(x.norm[indNA.not], y.norm[indNA.not], 
+     main = "index vs steps",
+     xlab = "x",
+     ylab = "y",
+     col = col[1]
+     )
+lines(x.norm[indNA], y.norm[indNA], col = col[2], lwd = 2)
+points(x.norm[indNA], y.norm[indNA], col = col[2])
+# abline(y = y.mu, lwd = 3)
 ```
 
 ## Regression Imputation
