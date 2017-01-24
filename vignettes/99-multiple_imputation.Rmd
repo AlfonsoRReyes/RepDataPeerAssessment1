@@ -425,35 +425,36 @@ tp
 
 ### Summary
 ```{r}
-info.ints <- data.frame(rows = nrow(imp), 
-                   cols = ncol(imp),
-                   min = min(imp[, indVar]),
-                   max = max(imp[, indVar]),
+info.ints <- data.frame(rows = nrow(imp.df), 
+                   cols = ncol(imp.df),
+                   min = min(imp.df[, indVar]),
+                   max = max(imp.df[, indVar]),
                    NAs.before = length(indNA),
                    NAs.after = length(indNA.not)
                    )
           
-info.dbls <- data.frame(median = median(imp[, indVar]),
-                        mean = mean(imp[, indVar]),
-                   sd = sd(imp[, indVar]),
-                   ses= sd(imp[, indVar]) / 
-                     sqrt(sum(!is.na(imp[, indVar])))
+info.dbls <- data.frame(median = median(imp.df[, indVar]),
+                        mean = mean(imp.df[, indVar]),
+                   sd = sd(imp.df[, indVar]),
+                   ses= sd(imp.df[, indVar]) / 
+                     sqrt(sum(!is.na(imp.df[, indVar])))
                    )
 info.ints <- t(info.ints)
 info.dbls <- t(info.dbls)
 info.ints
 info.dbls
 ```
+
 ### Normalized variables `steps` and  `row-index`
 ```{r}
-y <- imp$steps
+y <- imp.df$steps
 y.sig <- sd(y)
 y.mu <- mean(y)
 y.norm <- (y - y.mu) / y.sig
 min(y.norm)
 max(y.norm)
 
-x <- seq(1:nrow(imp))
+x <- seq(1:nrow(imp.df))
 x.sig <- sd(x)
 x.mu <- mean(x)
 x.norm <- (x - x.mu) / x.sig
