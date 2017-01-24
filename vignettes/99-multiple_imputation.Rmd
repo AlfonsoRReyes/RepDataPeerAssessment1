@@ -561,13 +561,10 @@ library(RepDataPeerAssessment1)
 imp.df <- activity
 indVar <- "steps"
 indNA <- which(is.na(activity[, indVar]))            # which rows are NA
+indNA.not <- which(!((1:nrow(activity)) %in% indNA)) # rows that are not NA
 
-steps.imp <- imp$imp$steps$`1`   # all imputed values ONLY; no observations
-steps <- activity$steps          # obs + NAs
-
-# summary(steps); dim(steps)
-steps[indNA] <- steps.imp        # replace the NAs with imputed values
-# summary(steps); dim(steps)
+# steps.imp <- imp$imp$steps$`1`   # all imputed values ONLY; no observations
+steps.imp <- imp$imp[indVar][[1]]   # all imputed values ONLY; no observations
 
 imp.df[indNA, indVar] <- steps.imp
 
@@ -578,9 +575,23 @@ df.before <- info.imp(activity, indVar, "Before", 2)
 # get information after imputing data
 df.mean <- info.imp(imp.df, indVar, "Mean", 2)
 
-
 cbind(df.before, df.mean)
+
 ```
+
+### Verify that data frame merged well
+```{r}
+# x<-cbind(rnorm(10),rnorm(10))
+
+plot1<-xyplot(imp.df[indNA.not, indVar]~imp.df[indNA.not, "interval"],
+              col="blue", cex = 0.75)
+plot2<-xyplot(imp.df[indNA, indVar]~imp.df[indNA, "interval"], 
+              col = "red", cex = 0.75)
+
+library(latticeExtra)
+plot1+plot2
+```
+
 
 ### Build a plot of normalized values
 
