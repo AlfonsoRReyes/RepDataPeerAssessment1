@@ -426,18 +426,50 @@ tp
 ```
 
 ```{r}
+# Before
+df <- data.frame(activity$steps)
 
+my.summary <- function(x,...){c(
+  mean   = mean(x, ...),
+  sd     = sd(x, ...),
+  median = median(x, ...),
+  min    = min(x, ...),
+  max    = max(x,...),
+  n      = length(x))
+}
+
+apply(df, 2, my.summary)
+```
+
+```{r}
+
+# Before
+df <- activity[, c("interval", "steps")]
+
+my.summary <- function(x, ...) {c(
+                  rows = nrow(x), 
+                   cols = ncol(x),
+                   min = min(x),
+                   max = max(x),
+                   NAs.before = length(indNA),
+                   NAs.after = length(indNA.not)
+                  )
+}
+
+sapply(df, my.summary)
 ```
 
 
 ### Summary
 ```{r}
-info.ints <- data.frame(rows = nrow(imp.df), 
+info.ints <- data.frame(
+                  rows = nrow(imp.df), 
                    cols = ncol(imp.df),
                    min = min(imp.df[, indVar]),
                    max = max(imp.df[, indVar]),
-                   NAs.before = length(indNA),
-                   NAs.after = length(indNA.not)
+                   Obs = length(indNA.not),
+                   NAs = length(indNA)
+                   
                    )
           
 info.dbls <- data.frame(median = median(imp.df[, indVar]),
@@ -451,6 +483,40 @@ info.dbls <- t(info.dbls)
 info.ints
 round(info.dbls, 3)
 ```
+
+```{r}
+info.imp <- function(x, uniVar, colName, decs = 3) {
+  if (anyNA(x[, uniVar])) {
+    # stop("var has NAs")
+    indNA <- which(is.na(x[, uniVar]))   # which rows are NA
+    indNA.not <- which(!((1:nrow(x)) %in% indNA))  # 
+    count.NA <- length(indNA)
+    
+    x <- x[indNA.not, ]
+    
+  }
+  
+  tmp <- data.frame(nrows = nrow(x),
+    median = median(x[, uniVar]),
+                        mean = mean(x[, uniVar]),
+                        sd = sd(x[, uniVar]),
+                        ses = sd(x[, uniVar]) / 
+                                  sqrt(sum(!is.na(x[, uniVar])))
+                   )
+  tmp <- data.frame(round(t(tmp), decs))
+  names(tmp) <- colName
+  return(tmp)
+  
+  
+}
+
+# get information after imputing data
+info.imp(imp.df, indVar, "After", 2)
+
+# get information before imputing data
+info.imp(activity, indVar, "Before", 2)
+```
+
 
 ### Normalized variables `steps` and  `row-index`
 ```{r}
