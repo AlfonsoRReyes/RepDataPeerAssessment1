@@ -487,21 +487,19 @@ round(info.dbls, 3)
 ```{r}
 info.imp <- function(x, uniVar, colName, decs = 3) {
   if (anyNA(x[, uniVar])) {
-    # stop("var has NAs")
-    indNA <- which(is.na(x[, uniVar]))   # which rows are NA
-    indNA.not <- which(!((1:nrow(x)) %in% indNA))  # 
+    indNA <- which(is.na(x[, uniVar]))             # which rows are NA
+    indNA.not <- which(!((1:nrow(x)) %in% indNA))  # which rows are not NA
     count.NA <- length(indNA)
     
-    x <- x[indNA.not, ]
+    x <- x[indNA.not, ]    # get the observations only; not NAs
     
   }
   
-  tmp <- data.frame(nrows = nrow(x),
-    median = median(x[, uniVar]),
-                        mean = mean(x[, uniVar]),
-                        sd = sd(x[, uniVar]),
-                        ses = sd(x[, uniVar]) / 
-                                  sqrt(sum(!is.na(x[, uniVar])))
+  tmp <- data.frame(nrows = nrow(x), 
+                    median = median(x[, uniVar]),
+                    mean = mean(x[, uniVar]),
+                    sd = sd(x[, uniVar]),
+                    ses = sd(x[, uniVar]) / sqrt(sum(!is.na(x[, uniVar])))
                    )
   tmp <- data.frame(round(t(tmp), decs))
   names(tmp) <- colName
@@ -510,12 +508,21 @@ info.imp <- function(x, uniVar, colName, decs = 3) {
   
 }
 
-# get information after imputing data
-info.imp(imp.df, indVar, "After", 2)
-
 # get information before imputing data
-info.imp(activity, indVar, "Before", 2)
+df1 <- info.imp(activity, indVar, "Before", 2)
+
+# get information after imputing data
+df2 <- info.imp(imp.df, indVar, "After", 2)
+
+
+cbind(df1, df2)
 ```
+
+```{r}
+df <- activity[, c("interval", "steps")]
+basicStats(df)
+```
+
 
 
 ### Normalized variables `steps` and  `row-index`
