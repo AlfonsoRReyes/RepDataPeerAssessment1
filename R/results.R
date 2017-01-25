@@ -33,5 +33,18 @@ info.imp <- function(x, uniVar, colName, decs = 3) {
   names(tmp) <- colName
   return(tmp)
 
+}
+
+#' Get a complete data frame including the imputed values
+#'
+get.imp.df <- function(x, mice.imp, uniVar) {
+  imp.df <- x
+  indNA <- which(is.na(x[, uniVar]))            # which rows are NA
+  indNA.not <- which(!((1:nrow(x)) %in% indNA)) # rows that are not NA
+
+  steps.imp <- mice.imp$imp[uniVar][[1]]   # all imputed values ONLY; no observations
+
+  imp.df[indNA, uniVar] <- steps.imp
+  return(imp.df)
 
 }

@@ -558,16 +558,17 @@ print(tp, newpage = FALSE, position = c(0.48,0.08,1,0.92))
 ```{r}
 library(RepDataPeerAssessment1)
 
-imp.df <- activity
-indVar <- "steps"
-indNA <- which(is.na(activity[, indVar]))            # which rows are NA
-indNA.not <- which(!((1:nrow(activity)) %in% indNA)) # rows that are not NA
+# imp.df <- activity
+# indVar <- "steps"
+# indNA <- which(is.na(activity[, indVar]))            # which rows are NA
+# indNA.not <- which(!((1:nrow(activity)) %in% indNA)) # rows that are not NA
+# 
+# # steps.imp <- imp$imp$steps$`1`   # all imputed values ONLY; no observations
+# steps.imp <- imp$imp[indVar][[1]]   # all imputed values ONLY; no observations
+# 
+# imp.df[indNA, indVar] <- steps.imp
 
-# steps.imp <- imp$imp$steps$`1`   # all imputed values ONLY; no observations
-steps.imp <- imp$imp[indVar][[1]]   # all imputed values ONLY; no observations
-
-imp.df[indNA, indVar] <- steps.imp
-
+imp.df <- get.imp.df(activity, imp, "steps")
 
 # get information before imputing data
 df.before <- info.imp(activity, indVar, "Before", 2)
