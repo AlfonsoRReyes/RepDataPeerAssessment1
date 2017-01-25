@@ -567,13 +567,16 @@ df.before <- info.imp(activity, indVar, "Before", 2)    # summary before
 # get information after imputing data
 df.mean <- info.imp(imp.df, indVar, "Mean", 2)          # summary after
 
-cbind(df.before, df.mean)
+cbind(df.before, df.mean)       # merge the two data frames
 
 ```
 
 ### Verify that data frame merged well
 ```{r}
 # x<-cbind(rnorm(10),rnorm(10))
+indVar <- "steps"
+indNA <- which(is.na(activity[, indVar]))            # which rows are NA
+indNA.not <- which(!((1:nrow(activity)) %in% indNA)) # rows that are not NA
 
 plot1<-xyplot(imp.df[indNA.not, indVar]~imp.df[indNA.not, "interval"],
               col="blue", cex = 0.75)
@@ -585,52 +588,6 @@ plot1+plot2
 ```
 
 
-### Build a plot of normalized values
-
-```{r fig.asp=1}
- max <- max(nas.complete(activity$steps))
-# find NA and not NA row-indexes
-indVar <- "steps"
-indNA <- which(is.na(activity[, indVar]))            # which rows are NA
-indNA.not <- which(!((1:nrow(activity)) %in% indNA)) # rows that are not NA
-
-steps.imp <- imp$imp$steps$`1`   # all imputed values ONLY; no observations
-steps <- activity$steps          # obs + NAs
-
-# summary(steps); dim(steps)
-steps[indNA] <- steps.imp        # replace the NAs with imputed values
-# summary(steps); dim(steps)
-
-
-y <- steps
-y.sig <- sd(y)
-y.mu <- mean(y)
-y.norm <- (y - y.mu) / y.sig
-min(y.norm)
-max(y.norm)
-
-x <- seq(1:nrow(activity))
-x.sig <- sd(x)
-x.mu <- mean(x)
-x.norm <- (x - x.mu) / x.sig
-min(x.norm)
-max(x.norm)
-
-
-
-# plot row-index vs steps
-col <- c(mdc(4),mdc(5))
-
-plot(x.norm[indNA.not], y.norm[indNA.not], 
-     main = "index vs steps",
-     xlab = "x",
-     ylab = "y",
-     col = col[1]
-     )
-lines(x.norm[indNA], y.norm[indNA], col = col[2], lwd = 2)
-points(x.norm[indNA], y.norm[indNA], col = col[2])
-# abline(y = y.mu, lwd = 3)
-```
 
 ## Regression Imputation
 ```{r}
