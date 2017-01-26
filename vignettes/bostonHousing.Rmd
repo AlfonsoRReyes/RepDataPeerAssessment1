@@ -22,10 +22,10 @@ original <- BostonHousing  # backup original data
 # Introduce missing values
 set.seed(100)
 BostonHousing[sample(1:nrow(BostonHousing), 40), "rad"] <- NA
-BostonHousing[sample(1:nrow(BostonHousing), 40), "ptratio"]   
+BostonHousing[sample(1:nrow(BostonHousing), 40), "ptratio"] <- NA
 ```
-The missing values have been injected. Though we know where the missings are, lets quickly check the ‘missings’ pattern using mice::md.pattern.
 
+The missing values have been injected. Though we know where the missings are, lets quickly check the ‘missings’ pattern using mice::md.pattern.
 
 ```{r}
 # Pattern of missing values
@@ -40,24 +40,53 @@ There are really four ways you can handle missing values:
 * Imputation with mean / median / mode
 * Prediction
 
+## 1. Deleting the observations
+If you have large number of observations in your dataset, where all the classes to be predicted are sufficiently represented in the training data, then try deleting (or not to include missing values while model building, for example by setting na.action=na.omit) those observations (rows) that contain missing values. Make sure after deleting the observations, you have:
+
+1. Have sufficent data points, so the model doesn’t lose power.
+2. Not to introduce bias (meaning, disproportionate or non-representation of classes).
+
 ```{r}
 # Example
 lm(medv ~ ptratio + rad, data=BostonHousing, na.action=na.omit)
 ```
 
+## 2. Deleting the variable
+If a particular variable is having more missing values that rest of the variables in the dataset, and, if by removing that one variable you can save many observations. I would, then, suggest to remove that particular variable, unless it is a really important predictor that makes a lot of business sense. It is a matter of deciding between the importance of the variable and losing out on a number of observations.
 
+
+## 3. Imputation with mean / median / mode
+Replacing the missing values with the mean / median / mode is a **crude way** of treating missing values. Depending on the context, like if the variation is low or if the variable has low leverage over the response, such a rough approximation is acceptable and could possibly give satisfactory results.
+
+
+### 3.1 impute with the mean
 ```{r}
 library(Hmisc)
 impute(BostonHousing$ptratio, mean)  # replace with mean
+```
+
+### 3.2 impute with the median
+```{r}
 impute(BostonHousing$ptratio, median)  # median
+
+```
+
+### 3.3 impute with specific number
+```{r}
 impute(BostonHousing$ptratio, 20)  # replace specific number
 
+
+```
+
+
+### 3.4 impute manually
+```{r}
 # or if you want to impute manually
 BostonHousing$ptratio[is.na(BostonHousing$ptratio)] <- mean(BostonHousing$ptratio, 
                                                             na.rm = T)  # not run
 ```
 
-
+### 3.5 Accuracy with the mean
 Lets compute the accuracy when it is imputed with mean
 
 ```{r}
