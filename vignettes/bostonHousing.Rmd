@@ -1,7 +1,13 @@
 ---
 title: "Missing Value Treatment"
-output: html_notebook
+output:
+  html_document: default
+  html_notebook: default
 ---
+
+```{r setup, include=FALSE, error=TRUE, message=FALSE}
+knitr::opts_chunk$set(echo = TRUE, comment = NA, error = TRUE)
+```
 
 ## 3. Imputation with mean / median / mode
 Source: https://www.r-bloggers.com/missing-value-treatment/
@@ -18,10 +24,7 @@ set.seed(100)
 BostonHousing[sample(1:nrow(BostonHousing), 40), "rad"] <- NA
 BostonHousing[sample(1:nrow(BostonHousing), 40), "ptratio"]   
 ```
-
-```{r}
-names(BostonHousing)
-```
+The missing values have been injected. Though we know where the missings are, lets quickly check the ‘missings’ pattern using mice::md.pattern.
 
 
 ```{r}
@@ -29,6 +32,13 @@ names(BostonHousing)
 library(mice)
 md.pattern(BostonHousing)  # pattern or missing values in data.
 ```
+
+There are really four ways you can handle missing values:
+
+* Deleting the observations
+* Deleting the variable
+* Imputation with mean / median / mode
+* Prediction
 
 ```{r}
 # Example
