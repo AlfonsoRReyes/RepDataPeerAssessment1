@@ -23,6 +23,8 @@ original <- BostonHousing  # backup original data
 set.seed(100)
 BostonHousing[sample(1:nrow(BostonHousing), 40), "rad"] <- NA
 BostonHousing[sample(1:nrow(BostonHousing), 40), "ptratio"] <- NA
+
+original.NA <- BostonHousing
 ```
 
 The missing values have been injected. Though we know where the missings are, lets quickly check the ‘missings’ pattern using mice::md.pattern.
@@ -60,7 +62,7 @@ Replacing the missing values with the mean / median / mode is a **crude way** of
 
 
 ### 3.1 impute with the mean
-```{r}
+```{r message=FALSE}
 library(Hmisc)
 impute(BostonHousing$ptratio, mean)  # replace with mean
 ```
@@ -74,27 +76,211 @@ impute(BostonHousing$ptratio, median)  # median
 ### 3.3 impute with specific number
 ```{r}
 impute(BostonHousing$ptratio, 20)  # replace specific number
-
-
 ```
 
 
 ### 3.4 impute manually
 ```{r}
 # or if you want to impute manually
-BostonHousing$ptratio[is.na(BostonHousing$ptratio)] <- mean(BostonHousing$ptratio, 
-                                                            na.rm = T)  # not run
+BostonHousing$ptratio[is.na(BostonHousing$ptratio)] <- mean(BostonHousing$ptratio, na.rm = T)  # not run
 ```
 
 ### 3.5 Accuracy with the mean
-Lets compute the accuracy when it is imputed with mean
+Lets compute the accuracy when it is imputed with mean.
 
-```{r}
+> We use the function `regr.eval` from the **DMwR** package. This function compares the original vector with the modified one.
+
+mape: mean absolute percentage error
+"mae": mean absolute error, which is calculated as sum(|t_i - p_i|)/N, where t's are the true values and p's are the predictions, while N is supposed to be the size of both vectors.
+"mse": mean squared error, which is calculated as sum( (t_i - p_i)^2 )/N
+
+$$mae = \left ( \sum \left| (t_i - p_i) \right| \right) \frac {1}{N}$$
+$$mse = \left ( \sum (t_i - p_i)^2  \right) \frac {1}{N}$$
+
+$$rmse = \sqrt {mse}$$
+
+$$mape = \left ( \sum \frac{{t_i - p_i}} {t_i}  \right )  \frac {1}{N}$$
+
+
+```{r results='hold', message=FALSE}
 library(DMwR)
-actuals <- original$ptratio[is.na(BostonHousing$ptratio)]
-predicteds <- rep(mean(BostonHousing$ptratio, na.rm=T), length(actuals))
+
+BostonHousing <- original.NA
+
+actuals <- original$ptratio[is.na(BostonHousing$ptratio)]  # take the original values
+predicteds <- rep(mean(BostonHousing$ptratio, na.rm = TRUE), length(actuals))
 regr.eval(actuals, predicteds)
 
 #>        mae        mse       rmse       mape 
 #> 1.62324034 4.19306071 2.04769644 0.095456
 ```
+
+**What is the Standard Error?**
+This is calculated over the vector `ptratio` without any NAs.
+```{r}
+BostonHousing <- original.NA
+se.0 <- sd(BostonHousing$ptratio, na.rm = TRUE) / sqrt(sum(!is.na(BostonHousing$ptratio)))
+se.0
+```
+
+```{r}
+indNA <- which(is.na(BostonHousing$ptratio))
+BostonHousing$ptratio[indNA] <- predicteds
+se.1 <- sd(BostonHousing$ptratio) / sqrt(sum(!is.na(BostonHousing$ptratio)))
+se.1
+```
+
+```{r}
+(se.0 - se.1) / se.0 * 100
+```
+
+
+## 4. Prediction
+Prediction is most advanced method to impute your missing values and includes different approaches such as: kNN Imputation, rpart, and mice.
+
+
+### kNN Imputation
+DMwR::knnImputation uses k-Nearest Neighbours approach to impute missing values. What kNN imputation does in simpler terms is as follows: For every observation to be imputed, it identifies ‘k’ closest observations based on the euclidean distance and computes the weighted average (weighted based on distance) of these ‘k’ obs.
+
+The advantage is that you could impute all the missing values in all variables with one call to the function. It takes the whole data frame as the argument and you don’t even have to specify which variable you want to impute. But be cautious not to include the response variable while imputing, because, when imputing in test/production environment, if your data contains missing values, you won’t be able to use the unknown response variable at that time.
+
+```{r results='hold'}
+library(DMwR)
+
+BostonHousing <- original.NA
+knnOutput <- knnImputation(BostonHousing[, !names(BostonHousing) %in% "medv"])  # perform knn imputation.
+anyNA(knnOutput)
+#> FALSE
+
+```
+
+Lets compute the accuracy.
+
+```{r results='hold'}
+
+actuals <- original$ptratio[is.na(BostonHousing$ptratio)]
+predicteds <- knnOutput[is.na(BostonHousing$ptratio), "ptratio"]
+regr.eval(actuals, predicteds)
+#>        mae        mse       rmse       mape 
+#> 1.00188715 1.97910183 1.40680554 0.05859526 
+```
+
+The mean absolute percentage error (mape) has improved by ~ 39% compared to the imputation by mean.   
+Good.
+
+```{r}
+indNA <- which(is.na(BostonHousing$ptratio))
+BostonHousing$ptratio[indNA] <- predicteds
+se.2 <- sd(BostonHousing$ptratio) / sqrt(sum(!is.na(BostonHousing$ptratio)))
+se.2
+```
+
+```{r}
+(se.0 - se.2) / se.0 * 100
+```
+
+
+### 4.2 rpart
+The limitation with DMwR::knnImputation is that it sometimes may not be appropriate to use when the missing value comes from a factor variable. Both rpart and mice has flexibility to handle that scenario. The advantage with rpart is that you just need only one of the variables to be non NA in the predictor fields.
+
+The idea here is we are going to use rpart to predict the missing values instead of kNN. To handle factor variable, we can set the method=class while calling rpart(). For numeric, we use, method=anova. Here again, we need to make sure not to train rpart on response variable (medv).
+
+```{r}
+library(rpart)
+
+BostonHousing <- original.NA
+
+class_mod <- rpart(rad ~ . - medv, 
+                   data=BostonHousing[!is.na(BostonHousing$rad), ], 
+                   method="class", na.action=na.omit)  # since rad is a factor
+
+anova_mod <- rpart(ptratio ~ . - medv, 
+                   data=BostonHousing[!is.na(BostonHousing$ptratio), ],
+                   method="anova", na.action=na.omit)  # since ptratio is numeric.
+
+rad_pred <- predict(class_mod, BostonHousing[is.na(BostonHousing$rad), ])
+ptratio_pred <- predict(anova_mod, BostonHousing[is.na(BostonHousing$ptratio), ])
+```
+
+Lets compute the accuracy for ptratio
+
+```{r}
+
+actuals <- original$ptratio[is.na(BostonHousing$ptratio)]
+predicteds <- ptratio_pred
+regr.eval(actuals, predicteds)
+#>        mae        mse       rmse       mape 
+#> 0.71061673 0.99693845 0.99846805 0.04099908 
+```
+
+The mean absolute percentage error (mape) has improved additionally by another ~ 30% compared to the knnImputation. Very Good.
+
+```{r}
+indNA <- which(is.na(BostonHousing$ptratio))
+BostonHousing$ptratio[indNA] <- predicteds
+se.3 <- sd(BostonHousing$ptratio) / sqrt(sum(!is.na(BostonHousing$ptratio)))
+se.3
+(se.0 - se.3) / se.0 * 100
+```
+
+
+
+Accuracy for rad
+
+```{r}
+actuals <- original$rad[is.na(BostonHousing$rad)]
+predicteds <- as.numeric(colnames(rad_pred)[apply(rad_pred, 1, which.max)])
+mean(actuals != predicteds)  # compute misclass error.
+#> 0.25 
+```
+
+### 4.3 mice
+mice short for Multivariate Imputation by Chained Equations is an R package that provides advanced features for missing value treatment. It uses a slightly uncommon way of implementing the imputation in 2-steps, using mice() to build the model and complete() to generate the completed data. The mice(df) function produces multiple complete copies of df, each with different imputations of the missing data. The complete() function returns one or several of these data sets, with the default being the first. Lets see how to impute ‘rad’ and ‘ptratio’:
+
+```{r}
+library(mice)
+
+BostonHousing <- original.NA
+
+miceMod <- mice(BostonHousing[, !names(BostonHousing) %in% "medv"], method="rf")  # perform mice imputation, based on random forests.
+miceOutput <- mice::complete(miceMod)  # generate the completed data.
+anyNA(miceOutput)
+#> FALSE
+```
+
+Lets compute the accuracy of ptratio.
+
+```{r}
+actuals <- original$ptratio[is.na(BostonHousing$ptratio)]
+predicteds <- miceOutput[is.na(BostonHousing$ptratio), "ptratio"]
+regr.eval(actuals, predicteds)
+#>        mae        mse       rmse       mape 
+#> 0.36500000 0.78100000 0.88374204 0.02121326
+```
+
+The mean absolute percentage error (mape) has improved additionally by ~ 48% compared to the rpart. Excellent!.
+
+```{r}
+indNA <- which(is.na(BostonHousing$ptratio))
+BostonHousing$ptratio[indNA] <- predicteds
+anyNA(BostonHousing$ptratio)
+se.4 <- sd(BostonHousing$ptratio) / sqrt(sum(!is.na(BostonHousing$ptratio)))
+se.4
+(se.0 - se.4) / se.0 * 100
+```
+
+
+Lets compute the accuracy of rad
+
+```{r}
+actuals <- original$rad[is.na(BostonHousing$rad)]
+predicteds <- miceOutput[is.na(BostonHousing$rad), "rad"]
+mean(actuals != predicteds)  # compute misclass error.
+#> 0.15
+```
+
+The mis-classification error reduced to 15%, which is 6 out of 40 observations. This is a good improvement compared to rpart’s 25%.
+
+If you’d like to dig in deeper, here is the manual or in this other post about mice from DataScience+.
+
+Though we have an idea of how each method performs, there is not enough evidence to conclude which method is better or worse. But these are definitely worth testing out the next time you impute missing values.
