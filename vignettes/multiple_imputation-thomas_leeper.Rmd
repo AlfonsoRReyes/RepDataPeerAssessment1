@@ -1,0 +1,212 @@
+---
+title: "multiple imputation"
+output: html_notebook
+---
+
+Source: http://thomasleeper.com/Rcourse/Tutorials/mi.html
+
+The resulting standard error is interesting because we increase the precision of our estimate by using 10 rather than 7 values (and standard errors are proportionate to sample size), but is larger than our original standard error because we have to account for uncertainty due to imputation. Thus if our missing values are truly missing at random, we can get a better estimate that is actually representative of our original population. Most multiple imputation algorithms are, however, applied to multivariate data rather than a single data vector and thereby use additional information about the relationship between observed values and missingness to reach even more precise estimates of target parameters.
+
+There are three main R packages that offer multiple imputation techniques. Several other packages - described in the OfficialStatistics Task View - supply other imputation techniques, but packages Amelia (by Gary King and collaborators), mi (by Andrew Gelman and collaborators), and mice (by Stef van Buuren and collaborators) provide more than enough to work with. Let's start by installing these packages:
+
+```{r}
+set.seed(10)
+
+x1 <- runif(100, 0, 5)
+x2 <- rnorm(100)
+y <- x1 + x2 + rnorm(100)
+mydf <- cbind.data.frame(x1, x2, y)
+```
+
+
+Now, let's randomly remove some of the observed values of the independent variables:
+
+```{r}
+mydf$x1[sample(1:nrow(mydf), 20, FALSE)] <- NA
+mydf$x2[sample(1:nrow(mydf), 10, FALSE)] <- NA
+```
+
+The result is the removal of thirty values, 20 from x1 and 10 from x2:
+
+```{r}
+summary(mydf)
+```
+
+If we estimate the regression on these data, R will force casewise deletion of 28 cases:
+
+```{r}
+lm <- lm(y ~ x1 + x2, data = mydf)
+summary(lm)
+summary(lm)$coef[, 1:2]
+```
+
+We should thus be quite skeptical of our results given that we're discarding a substantial portion of our observations (28%, in fact). Let's see how the various multiple imputation packages address this and affect our inference.
+
+## Amelia
+
+```{r fig.asp=1}
+library(Amelia)
+
+imp.amelia <- amelia(mydf)
+missmap(imp.amelia, main = "")
+```
+
+
+```{r}
+lm.amelia.out <- lapply(imp.amelia$imputations, function(i) lm(y ~ x1 + x2, 
+    data = i))
+```
+
+
+```{r}
+lm.amelia.out
+```
+
+```{r}
+coefs.amelia <- do.call(rbind, lapply(lm.amelia.out, function(i) coef(summary(i))[, 
+    1]))
+ses.amelia <- do.call(rbind, lapply(lm.amelia.out, function(i) coef(summary(i))[, 
+    2]))
+mi.meld(coefs.amelia, ses.amelia)
+```
+
+Now let's compare these results to those of our original model:
+
+```{r}
+t(do.call(rbind, mi.meld(coefs.amelia, ses.amelia)))
+```
+
+```{r}
+coef(summary(lm))[, 1:2]  # original results
+```
+
+## mi
+
+```{r}
+library(mi)
+
+
+mi.mydf <- missing_data.frame(mydf)
+image(mi.mydf)
+
+```
+
+```{r fig.asp=1}
+par(ask=F)
+hist(mi.mydf)
+```
+
+
+
+```{r}
+show(mi.mydf)
+```
+
+```{r}
+summary(mi.mydf)
+```
+
+
+```{r}
+imp.mi <- mi(mi.mydf)
+```
+
+```{r}
+show(imp.mi)
+```
+
+The results above report how many imputed datasets were produced and summarizes some of the results we saw above. For linear regression (and several other common models), the mi package includes functions that automatically run the model on each imputed dataset and aggregate the results:
+
+```{r}
+lm.mi.out <- pool(y ~ x1 + x2, data = imp.mi)
+display(lm.mi.out)
+```
+
+```{r}
+coef.mi <- lm.mi.out@pooled_summary
+# or see them quickly with:
+display(lm.mi.out)
+```
+
+```{r}
+do.call(cbind, coef.mi)  # multiply imputed results
+```
+
+```{r}
+coef(summary(lm))[, 1:2]  # original results
+```
+
+
+## mice
+
+```{r}
+library(mice)
+
+imp.mice <- mice(mydf)
+
+```
+
+
+```{r}
+summary(imp.mice)
+```
+
+```{r}
+lm.mice.out <- with(imp.mice, lm(y ~ x1 + x2))
+summary(lm.mice.out)
+```
+
+```{r}
+pool.mice <- mice::pool(lm.mice.out)
+```
+
+
+
+```{r}
+summary(pool.mice)  # multiply imputed results
+```
+
+
+## Comparing packages
+
+```{r}
+s.amelia <- t(do.call(rbind, mi.meld(coefs.amelia, ses.amelia)))
+s.amelia
+```
+
+```{r}
+s.mi <- do.call(cbind, coef.mi)  # multiply imputed results
+```
+
+
+mice package results
+```{r}
+s.mice <- summary(pool.mice)[, 1:2]  # multiply imputed results
+s.mice
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+```{r}
+s.real <- summary(lm(y ~ x1 + x2))$coef[, 1:2]
+s.real
+```
+

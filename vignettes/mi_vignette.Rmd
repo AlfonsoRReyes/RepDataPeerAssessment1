@@ -1,0 +1,125 @@
+---
+title: "mi vignette"
+output: html_notebook
+---
+
+```{r}
+library(mi)
+data(nlsyV, package = "mi")
+```
+
+
+
+From there, the first step is to convert the data.frame to a `missing_data.frame`, which is an **enhanced version** of a data.frame that includes metadata about the variables that is essential in a missing data context.
+
+```{r}
+mdf <- missing_data.frame(nlsyV)
+```
+
+The `missing_data.frame` constructor function creates a missing_data.frame called mdf, which in turn contains seven missing_variables, one for each column of the nlsyV dataset.
+
+The most important aspect of a missing_variable is its class, such as continuous, binary, and count among many others (see the table in the Slots section of the help page for missing_variable-class. The missing_data.frame constructor function will try to guess the appropriate class for each missing_variable, but rarely will it correspond perfectly to the user’s intent. Thus, it is very important to call the show method on a `missing_data.frame` to see the initial guesses
+
+
+```{r}
+show(mdf) # momrace is guessed to be ordered
+```
+
+and to modify them, if necessary, using the `change` function, which can be used to change many things about amissing_variable, so see its help page for more details. 
+
+In the example below, we change the class of the `momrace` (race of the mother) variable from the initial guess of ordered-categorical to a more appropriate unordered-categorical and change the income to nonnegative-continuous.
+
+```{r}
+
+mdf <- change(mdf,                                # missing data frame
+              y = c("income", "momrace"),         # y: is the missing vector
+              what = "type", 
+              to = c("non", "un"))   # nonnegative, unordered
+```
+
+
+```{r}
+show(mdf)
+```
+
+Once all of the missing_variables are set appropriately, it is useful to get a sense of the raw data, which can be accomplished by looking at the `summary`, `image`, and / or `hist` of a missing_data.frame use the mi function to do the actual imputation, which has several extra arguments that, for example, govern how many independent chains to utilize, how many iterations to conduct, and the maximum amount of time the user is willing to wait for all the iterations of all the chains to finish. 
+
+
+
+```{r}
+summary(mdf)
+```
+
+```{r fig.asp=1}
+par(ask=F)
+image(mdf)
+```
+
+```{r fig.asp=1}
+par(ask=F)
+hist(mdf)
+```
+
+The imputation step can be quite time consuming, particularly if there are many missing_variables and if many of them are categorical. One important way in which the computation time can be reduced is by imputing in parallel, which is highly recommended and is implemented in the `mi` function by default on non-Windows machines. If users encounter problems running `mi` with parallel processing, the problems are likely due to the machine exceeding available RAM. Sequential processing can be used instead for mi by using the parallel=FALSE option.
+
+```{r}
+rm(nlsyV) # good to remove large unnecessary objects to save RAM
+options(mc.cores = 2)
+imputations <- mi(mdf, n.iter = 30, n.chains = 4, max.minutes = 20)
+show(imputations)
+```
+
+The next step is very important and essentially verifies whether enough iterations were conducted. We wantthe mean of each completed variable to be roughly the same for each of the 4 chains.
+
+```{r}
+# mipply is sapply for mi objects
+round(mipply(imputations, mean, to.matrix = TRUE), 3) # apply the mean
+```
+
+```{r}
+Rhats(imputations)
+```
+
+If so — and when it does in the example depends on the pseudo-random number seed — we can procede to diagnosing other problems. For the sake of example, we continue our 4 chains for another 5 iterations by calling
+
+```{r}
+imputations <- mi(imputations, n.iter = 5)
+```
+
+to illustrate that this process can be continued until convergence is reached.
+Next, the plot of an object produced by mi displays, for all missing_variables (or some subset thereof), a histogram of the observed, imputed, and completed data, a comparison of the completed data to the fitted values implied by the model for the completed data, and a plot of the associated binned residuals.
+
+There will be one set of plots on a page for the first three chains, so that the user can get some sense of the sampling variability of the imputations. The hist function yields the same histograms as plot, but groups the histograms for all variables (within a chain) on the same plot. The imagefunction gives a sense of the missingness patterns in the data.
+
+```{r}
+par(ask=F)
+
+plot(imputations)
+```
+
+```{r fig.asp=1}
+par(ask=F)
+image(imputations)
+
+```
+
+```{r}
+summary(imputations)
+```
+
+
+Finally, we pool over m = 5 imputed datasets – pulled from across the 4 chains – in order to estimate a descriptive linear regression of test scores (ppvtr.36 ) at 36 months on a variety of demographic variables pertaining to the mother of the child
+
+```{r}
+analysis <- pool(ppvtr.36 ~ first + b.marr + income + momage + momed + momrace,
+data = imputations, m = 5)
+display(analysis)
+```
+
+The rest is optional and only necessary if you want to perform some operation that is not supported by the mi package, perhaps outside of R. Here we create a list of data.frames, which can be saved to the hard disk and / or exported in a variety of formats with the foreign package. Imputed data can be exported to Stata
+by using the mi2stata function instead of complete.
+
+```{r}
+dfs <- complete(imputations, m = 2)
+```
+
