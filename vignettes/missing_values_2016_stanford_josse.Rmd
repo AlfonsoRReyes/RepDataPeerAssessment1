@@ -9,7 +9,7 @@ output:
 # install.packages(c("VIM", "FactoMineR", "missMDA", "missForest", "norm"))
 ```
 
-
+## Ozone data
 ```{r}
 
 ###############################
@@ -20,8 +20,8 @@ ozo <- read.table("http://juliejosse.com/wp-content/uploads/2016/06/ozoneNA.csv"
                   header=TRUE, 
                   sep=",",row.names=1)
 
-WindDirection <- ozo[,12]
-don <- ozo[,1:11]   #### keep the continuous variables
+WindDirection <- ozo[, 12]  # get vector. Factor.
+don <- ozo[,1:11]   #### keep the continuous variables. remove one variable: WindDirection
 summary(don)
 head(don)
 dim(don)
@@ -76,9 +76,11 @@ res.comp$completeObs[1:3, ]
  
 indvar <- "T9"
 indNA <- which(is.na(don[,indvar]))  # get rows that are NA
+
 plot(density(res.comp$completeObs[indNA, indvar]),  # plot imputed data
      main = "Observed and imputed values for T9", 
      xlab = "T9")
+
 lines(density(res.comp$completeObs[which(!((1:nrow(don))%in%indNA)),indvar]),col = "red")                                              # plot observations 
 legend("topleft",text.col = c("black","red"),legend = c(" Imputation","Observed values"))
 
@@ -199,6 +201,8 @@ summary(poolamelia)
 
 ```
 
+
+## Ecological data
 ```{r}
 ##########
 ## Multiple Imputation categorical data
