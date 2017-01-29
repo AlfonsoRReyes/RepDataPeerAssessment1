@@ -49,29 +49,17 @@ downloadZip(fileUrl, outDir = outDir)   # download and unpack zip file
 
 
 #### Create the RData file
-More RData file may be generated during this assignment. They will be placed under the folder `data`.
+More RData files may be generated during this assignment. They will be placed under the folder `data`.
 
-```{r, results='hold'}
-# get the base folder and raw data folder
-baseLoc <- system.file(package="RepDataPeerAssessment1")
-extPath <- file.path(baseLoc, "extdata")
-baseLoc
-extPath
-```
-
-```{r}
-getwd()
-```
 
 
 #### Saving the dataset to `data`
 Reads the CSV raw data file from `inst/extdata` and save it under `data`. Then remove it from memory.
 ```{r}
 # save the dataset in the pkg base
-act <- read.csv(paste(project.extdata, "activity.csv", sep = "/"))
-save(act, file=paste(project.data, "act.RData", sep = "/"))
-act
-# rm(activity)
+activity <- read.csv(paste(project.extdata, "activity.csv", sep = "/"))
+save(activity, file=paste(project.data, "activity.RData", sep = "/"))
+activity
 ```
 
 ```{r}
