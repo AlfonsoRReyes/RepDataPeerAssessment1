@@ -26,12 +26,14 @@ mean(x, na.rm = TRUE)
 ```
 
 Standard Error of only the elements that are not NA:
+
+$$SE = \frac {\sigma_x} {\sqrt {\sum x_i}}$$
+
 ```{r}
 sd(x, na.rm = TRUE) / sqrt(sum(!is.na(x)))
 ```
+
 Generate 15 samples of new data replacing the NA elements with values extracted from the GOOD values.
-
-
 
 ```{r}
 na.count <- length(x[is.na(x) == TRUE])    # calculate the # of NAs
@@ -53,21 +55,41 @@ library(RepDataPeerAssessment1)
 
 data(activity)
 
+```
+
+### Renaming `steps` as `values`
+This is not really necessary because we can specify `values` in the function.
+```{r}
 #activity$interval <- as.factor(activity$interval)
 names(activity) <- c("value", "date", "interval")
 actbycol <- cast(activity, date ~ interval)
 ```
 
-
+### Keeping original variable names
+```{r}
+# this data frame has the following form:
+# date  interval_1  interval_2  interval_3 ... interval_n
+#         step_11                                 step_1n
+#         step_21                                 step_2n
+actbycol <- cast(activity, date ~ interval, value = "steps")
+```
 
 
 ```{r results='hold'}
 cat("# of variables:", (ncol(actbycol)), "\t")
 cat("# of intervals:", (ncol(actbycol)-1))
 cat("\n")
-mysample <- actbycol[sample(1:nrow(actbycol), 10, replace=FALSE), c(1:7, 283:289)]
+```
+
+```{r}
+# take a sample of the original data frame
+mysample <- actbycol[sample(1:nrow(actbycol), 
+                            10, 
+                            replace=FALSE), 
+                     c(1:7, 283:289)]
 mysample
 ```
+
 
 ```{r}
 splice <- list(rows = c(1:5, 57:61), cols = c(1:5, 286:289))
@@ -191,15 +213,15 @@ calcBefore(x25)
 calcAfter(x25)
 ```
 
+## Vectorizing functions
 
-
-## `lapply` example
+### `lapply` example
 ```{r}
 y <- list(a = 1:5, b = rnorm(10))
 y
 lapply(y, mean)
 ```
-## `sapply` example
+### `sapply` example
 
 ```{r}
 y <- list(a = 1:5, b = rnorm(10))
@@ -207,7 +229,6 @@ y
 sapply(y, mean)
 ```
 
-## Vectorizing functions
 
 ```{r}
 # subset of only the numerical data, no date
@@ -219,6 +240,7 @@ Applying a function to all the dataframe, excluding the date""
 ```{r}
 sapply(actbycol2, calcBefore)
 ```
+
 ### Calculating the Standard Error
 
 ```{r}
@@ -227,10 +249,10 @@ sapply(actbycol2, calcAfter)
 
 
 
-
 ```{r}
 hist(activity$value)
 ```
+
 ### histogram of activity without zeros
 ```{r}
 activity.nonzero <- subset(activity, activity$value > 0)
@@ -261,16 +283,20 @@ random.imp <- function (a){
 
 ```{r}
 x
+indNA <- which(is.na(x))   # which rows are NA
+indNA
 ```
 
 ```{r}
 missing <- is.na(x)
 missing
 ```
+
 ```{r}
 n.missing <- sum(missing)
 n.missing
 ```
+
 ```{r}
 x.obs <- x[!missing]
 x.obs
@@ -290,31 +316,43 @@ imputed
 ### Running function on a vector
 
 ```{r}
-random.imp(x)
+imp <- random.imp(x)
+plot(density(imp[indNA]), main = "Observed and imputed values", xlab = "x")
+lines(density(imp[which(!((1:nrow(array(x))) %in% indNA))]), col = "red")
+legend("topleft",text.col = c("black","red"),legend = c(" Imputation","Observed values"))
 ```
 
 ### Running function on 1st interval of `actbycol2`
 
 ```{r}
 x0
-random.imp(x0)
+imp <- random.imp(x0)      # impute random values
+indNA <- which(is.na(x0))   # which rows are NA
+
+plot(density(imp[indNA]), 
+     main = "Observed and imputed values", 
+     xlab = "x0")
+lines(density(imp[which(!((1:nrow(array(x0))) %in% indNA))]), col = "red")
+legend("topright",text.col = c("black","red"),legend = c(" Imputation","Observed values"))
 ```
 
 ```{r}
 actbycol2[splice$rows, splice$cols-1]
 ```
 
+### replaced by random values
 ```{r}
 actbycol.rep <- random.imp(actbycol2[, 1:10])
 ```
 
 ```{r}
-actbycol2[splice$rows, splice$cols-1]
+actbycol.rep[splice$rows, 1:10]
 ```
 
 ### numerical dataframe with replaced random values
 
 ```{r}
+summary(actbycol2)
 actbycol.imp <- random.imp(actbycol2)    
 actbycol.imp[splice$rows, splice$cols-1]
 ```
@@ -336,32 +374,170 @@ hist(subset(actbycol.imp.melt, actbycol.imp.melt$steps > 0)$steps)
 #hist(actbycol.imp.melt$steps)
 ```
 
-
-## Mean Imputation
 ```{r}
-# activity$interval <- as.numeric(activity$interval)
-names(activity) <- c("steps",    "date",     "interval")
+dim(activity)
+dim(actbycol.imp.melt)
 ```
 
-```{r}
-library(RepDataPeerAssessment1)
-```
-
+## Imputing random values. Density plot
 
 ```{r}
+library(reshape)
 library(lattice)
 library(mice)
 
+# load the data
+data("activity")
+
+# convert interval variable to multiple columns
+actbycol <- cast(activity, date ~ interval, value = "steps")
+
+# imputting random values
+actbycol.imp <- random.imp(actbycol[2:289]) 
+
+# rebuild to interval to one column
+date <- actbycol[, 1]                       # get the date
+actbycol.bind <- cbind(date, actbycol.imp)  # merge 288 cols with date
+actbycol.imp.melt <- melt(actbycol.bind, id = "date")  # go back to long df
+names(actbycol.imp.melt) <- c("date", "interval", "steps")  # rename vars
+
+# order by date so it is the same as original
+actbycol.imp.melt <- actbycol.imp.melt[order(actbycol.imp.melt$date), ]
+
+# convert interval to numeric
+actbycol.imp.melt$interval <- as.numeric(as.character(actbycol.imp.melt$interval))
+
+# prepare for plotting
+imp.df <- actbycol.imp.melt                 # the imputted data frame
+indVar <- "steps"                           # variable for plotting
+indNA <- which(is.na(activity[, indVar]))   # which rows are NA
+indNA.not <- which(!((1:nrow(activity)) %in% indNA))  # 
+                  
+plot(density(imp.df[indNA, indVar]), 
+     main = "Observed and imputed values", 
+     xlab = "steps")
+lines(density(imp.df[indNA.not, indVar]), 
+      col = "red")
+legend("topright",text.col = c("black","red"),legend = c(" Imputation","Observed values"))
+
+```
+
+```{r}
+
+lwd <- 1.5
+data <- imp.df[, c("steps", "interval")]
+tp <- xyplot(steps~interval, data = imp.df,
+             na.groups = ici(imp.df),
+             ylab ="steps", xlab="interval",
+       cex = 0.75, 
+       xlim = c(0, 2355),
+       
+       lex=lwd
+       #ylim = c(0, 900), 
+       #xlim = c(0, 500))
+)
+#print(tp, newpage = FALSE, position = c(0.48,0.08,1,0.92))
+tp
+```
+
+
+### Summary. Random imputing
+
+```{r}
+library(RepDataPeerAssessment1)
+
+# get information before imputing data
+df.before <- info.imp(activity, indVar, "Before", 2)
+
+# get information after imputing data
+df.random <- info.imp(imp.df, indVar, "Random", 2)
+
+
+df.random <- cbind(df.before, df.random)
+df.random
+```
+
+```{r}
+(df.random["ses", "Before"] - df.random["ses", "Random"]) / df.random["ses", "Before"] * 100
+```
+
+
+
+
+```{r}
+library(fBasics)
+df <- activity[, c("interval", "steps")]
+basicStats(df)
+```
+
+
+
+### Normalized variables `steps` and  `row-index`
+```{r}
+y <- imp.df$steps
+y.sig <- sd(y)
+y.mu <- mean(y)
+y.norm <- (y - y.mu) / y.sig
+min(y.norm)
+max(y.norm)
+
+x <- seq(1:nrow(imp.df))
+x.sig <- sd(x)
+x.mu <- mean(x)
+x.norm <- (x - x.mu) / x.sig
+min(x.norm)
+max(x.norm)
+```
+
+### Normalized interval (optional) DO NOT RUN
+This has the disadvantage of showing discontinuities along the x-axis since the interval is no n contiguous jumping in steps of 5.
+
+```{r}
+x <- imp$interval
+x.sig <- sd(x)
+x.mu <- mean(x)
+x.norm <- (x - x.mu) / x.sig
+min(x.norm)
+max(x.norm)
+```
+
+### Normalized plot `x` vs `y` of random imputting
+Normalizing the row-index should be the prefferred option to avoid showing gap along the x-axis.
+
+```{r fig.asp=1}
+# find NA and not NA row-indexes
+indVar <- "steps"
+indNA <- which(is.na(activity[, indVar]))   # which rows are NA
+indNA.not <- which(!((1:nrow(activity)) %in% indNA))
+
+# plot row-index vs steps
+col <- c(mdc(4),mdc(5))
+
+plot(x.norm[indNA.not], y.norm[indNA.not], 
+     main = "index vs steps",
+     xlab = "x",
+     ylab = "y",
+     col = col[1]
+     )
+points(x.norm[indNA], y.norm[indNA], col = col[2])
+```
+
+## Mean Imputation
+
+```{r}
+library(RepDataPeerAssessment1)
+library(lattice)
+library(mice)
+
+par(mfrow = c(1,2))
 data(activity)
 
 activity.nodate <- activity[, c(1, 3)]
 
 ### impute the mean
 #imp <- mice(activity.nodate, method="mean", m=1, maxit=1)
-imp <- mice(activity.nodate, method="mean", m=1, maxit=1)
-```
+imp <- mice(activity.nodate, method="mean", m=1, maxit=1, print = FALSE)
 
-```{r}
 ### Figure 1.1
 lwd <- 1.5
 # par(mfrow=c(1,2))
@@ -388,14 +564,10 @@ matplot(x, y, type="s",
         yaxs = "i",
         xlab="Steps",
         ylab="Frequency")
-# box()
+box()
 
-
-```
-
-```{r fig.asp=1}
 tp <- xyplot(imp, steps~interval, 
-             na.groups = ici(imp), 
+             na.groups = ici(imp),
              ylab ="steps", xlab="interval",
        cex = 0.75, 
        
@@ -403,21 +575,59 @@ tp <- xyplot(imp, steps~interval,
        #ylim = c(0, 900), 
        #xlim = c(0, 500))
 )
-#print(tp, newpage = FALSE, position = c(0.48,0.08,1,0.92))
-tp
+print(tp, newpage = FALSE, position = c(0.48,0.08,1,0.92))
+
+```
+
+```{r}
+# create summary table
+indVar <- "steps"     # variable to analyze
+
+imp.df <- get.imp.df(activity, imp, indVar)  # merge imputed values in original
+
+# get information before imputing data
+df.before <- info.imp(activity, indVar, "Before", 2)    # summary before
+
+# get information after imputing data
+df.mean <- info.imp(imp.df, indVar, "Mean", 2)          # summary after
+
+res.mean <- cbind(df.before, df.mean)       # merge the two data frames
+res.mean
+
+```
+
+```{r}
+(res.mean["ses", "Before"] - res.mean["ses", "Mean"]) / res.mean["ses", "Before"] * 100
+```
+
+
+### Verify that data frame merged well
+```{r}
+# x<-cbind(rnorm(10),rnorm(10))
+indVar <- "steps"
+indNA <- which(is.na(activity[, indVar]))            # which rows are NA
+indNA.not <- which(!((1:nrow(activity)) %in% indNA)) # rows that are not NA
+
+plot1<-xyplot(imp.df[indNA.not, indVar]~imp.df[indNA.not, "interval"],
+              col="blue", cex = 0.75)
+plot2<-xyplot(imp.df[indNA, indVar]~imp.df[indNA, "interval"], 
+              col = "red", cex = 0.75)
+
+library(latticeExtra)
+plot1+plot2
 ```
 
 ## Regression Imputation
+
 ```{r}
 
-fit <- lm(steps ~ interval, data=activity)
-pred <- predict(fit, newdata=ic(activity))
+fit <- lm(steps ~ interval, data = activity)   # fit the variables
+pred <- predict(fit, newdata = ic(activity))   # build predictor
 
 ### alternative using mice
-imp <- mice(activity[,c(1,3)], method="norm.predict", m=1, maxit=3,seed=1)
-```
+imp <- mice(activity[,c(1,3)], method="norm.predict", 
+            m=1, maxit=3, seed=1, print = FALSE)
 
-```{r}
 ### Figure 1.2
 par(mfrow = c(1,2))
 
@@ -434,9 +644,29 @@ box()
 
 tp <- xyplot(imp, steps~interval,
        ylab="steps", xlab="interval",
-       cex = 0.75, lex=lwd,
+       cex = 0.75, lex=lwd
 )
 print(tp, newpage = FALSE, position = c(0.48,0.08,1,0.92))
+```
+```{r}
+# create summary table
+indVar <- "steps"     # variable to analyze
+
+imp.df <- get.imp.df(activity, imp, indVar)  # merge imputed values in original
+
+# get information before imputing data
+df.before <- info.imp(activity, indVar, "Before", 2)    # summary before
+
+# get information after imputing data
+df.regression <- info.imp(imp.df, indVar, "Regression", 2)          # summary after
+
+res.regre <-cbind(df.before, df.regression)       # merge the two data frames
+res.regre
+
+```
+
+```{r}
+(res.regre["ses", "Before"] - res.regre["ses", "Regression"]) / res.regre["ses", "Before"] * 100
 ```
 
 
@@ -447,18 +677,19 @@ print(tp, newpage = FALSE, position = c(0.48,0.08,1,0.92))
 library(lattice)
 library(mice)
 
-imp <- mice(activity[,c(1,3)], method="pmm", m=1, maxit=3, seed=1)
+par(mfrow = c(1,2))
+
+imp <- mice(activity[,c(1,3)], method="pmm", m=1, maxit=3, seed=1, print = FALSE)
 
 lwd <- 2
 nudge <- 1
-### Figure 1.3
-par(mfrow = c(1,2))
 
+max <- max(nas.complete(activity$steps))
+# breaks <- seq(-100, 900, 10)
+breaks <- seq(0, max*1.1, 20)
+
+obs <- activity[, "steps"]
 mis  <- imp$imp$steps[,1]
-
-breaks <- seq(-500, 900, 10)
-
-obs <- activity[,"steps"]
 
 fobs <- c(hist(obs, breaks, plot=FALSE)$counts, 0)
 fmis <- c(hist(mis, breaks, plot=FALSE)$counts, 0)
@@ -477,18 +708,113 @@ box()
 
 tp <- xyplot(imp, steps~interval, na.groups=ici(imp),
        ylab="steps", xlab="interval",
-       cex = 0.75, lex=lwd,
+       cex = 0.75, lex=lwd
        )
-# tp
+
 print(tp, newpage = FALSE, position = c(0.48,0.08,1,0.92))
+
+# print(stripplot(imp), newpage = FALSE, position = c(0.2, 0.02, 2,0.7))
+# stripplot(imp)
 ```
+
+```{r}
+# create summary table
+indVar <- "steps"     # variable to analyze
+
+imp.df <- get.imp.df(activity, imp, indVar)  # merge imputed values in original
+
+# get information before imputing data
+df.before <- info.imp(activity, indVar, "Before", 2)    # summary before
+
+# get information after imputing data
+df.pmm <- info.imp(imp.df, indVar, "pmm", 2)          # summary after
+
+res.pmm <- cbind(df.before, df.pmm)       # merge the two data frames
+res.pmm
+```
+
+```{r}
+(res.pmm["ses", "Before"] - res.pmm["ses", "pmm"]) / res.pmm["ses", "Before"]  * 100
+```
+
+## LOCF with pkg zoo
+
+```{r}
+### Figure 1.4
+
+library(zoo)
+
+vec <- activity$steps
+
+bz <- zoo(vec)
+length(bz)
+imp <- zoo::na.locf(bz)
+length(bz) - length(imp)
+
+nas.count(imp)
+limRow <- length(imp)
+limRow
+
+colvec <- ifelse(is.na(vec), mdc(2), mdc(1))    # missing data coloring (Mdc)
+
+imp.df <- data.frame(imp)
+names(imp.df) <- "steps"
+imp.ind <- as.numeric(rownames(imp.df))
+range(imp.ind)
+
+plot(activity$interval[imp.ind], imp.df$steps, 
+     col = colvec, 
+     # type="l", 
+     xlab="Observation", 
+     ylab="Steps")
+
+points(imp.df[,], col = colvec, pch=20, cex=1)
+```
+
+```{r}
+zoo.get.stats <- function(x, uniVar, colName, decs = 3) {
+  tmp <- data.frame(nrows = nrow(x),
+                    median = median(x[, uniVar]),
+                    mean = mean(x[, uniVar]),
+                    sd = sd(x[, uniVar]),
+                    ses = sd(x[, uniVar]) / sqrt(sum(!is.na(x[, uniVar])))
+  )
+  tmp <- data.frame(round(t(tmp), decs))
+  names(tmp) <- colName
+  return(tmp)
+}  
+```
+
+
+
+
+```{r}
+# create summary table
+indVar <- "steps"     # variable to analyze
+
+
+# get information before imputing data
+df.before <- info.imp(activity, indVar, "Before", 2)    # summary before
+
+# get information after imputing data
+df.locf <- zoo.get.stats(imp.df, indVar, "locf", 2)           # summary after
+
+res.locf <- cbind(df.before, df.locf)       # merge the two data frames
+res.locf
+```
+
+```{r}
+(res.locf["ses", "Before"] - res.locf["ses", "locf"]) / res.locf["ses", "Before"] * 100
+```
+
+
 
 ## LOCF
 
 ```{r}
 library(lattice)
 library(mice)
-library(zoo)
+
 
 St <- activity$steps
 
@@ -576,33 +902,8 @@ points(Sti[1:limRow], col = colvec, pch=20, cex=1)
 ```
 
 
-```{r}
-### Figure 1.4
 
-library(zoo)
 
-St <- activity$steps
-
-# Sti <- na.locf(St)
-bz <- zoo(St)
-length(bz)
-Sti <- zoo::na.locf(bz)
-length(Sti)
-
-nas.count(Sti)
-par(mfrow=c(1,1))
-limRow <- length(Sti)
-
-colvec <- ifelse(is.na(St), mdc(2), mdc(1))    # missing data coloring (Mdc)
-
-plot(Sti[1:limRow], 
-     col = colvec, 
-     type="l", 
-     xlab="Observation", 
-     ylab="Steps")
-
-points(Sti[1:limRow], col = colvec, pch=20, cex=1)
-```
 
 ```{r}
 mean(St, na.rm = TRUE)
@@ -675,8 +976,5 @@ This number is not better than the one we obtained by doing the LOFC replacement
 
 
 
-```{r}
-ggplot_missing(activity)
-```
 
 

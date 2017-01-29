@@ -1,0 +1,110 @@
+---
+title: "MIce - Van Buure paper"
+output: html_notebook
+---
+
+Source: http://www.stefvanbuuren.nl/publications/MICE%20in%20R%20-%20Draft.pdf
+
+```{r}
+library("VIM")
+
+marginplot(nhanes[, c("chl", "bmi")], col = mdc(1:2), cex = 1.2, cex.lab = 1.2, cex.numbers = 1.3, pch = 19)
+
+```
+
+
+```{r}
+ imp <- mice(nhanes, seed = 23109)
+```
+
+```{r}
+print(imp)
+```
+
+```{r}
+imp$imp$bmi
+```
+
+```{r}
+mice::complete(imp)
+```
+
+The complete() function extracts the five imputed data sets from the imp object as a long (row-stacked) matrix with 125 records. The missing entries in nhanes have now been filled by the values from the first (of five) imputation. The second completed data set can be obtained by complete(imp, 2). For the observed data, it is identical to the first completed data set, but it may differ in the imputed data.
+
+It is often useful to inspect the distributions of original and the imputed data. One way of doing this is to use the function stripplot() in mice 2.9, an adapted version of the same function in the package lattice (Sarkar 2008). The stripplot in Figure 3 is created as
+
+```{r}
+stripplot(imp, pch = 20, cex = 1.2)
+```
+
+The figure shows the distributions of the four variables as individual points. Blue points are observed, the red points are imputed. The panel for age contains blue points only because age is complete. Furthermore, note that the red points follow the blue points reasonably well, including the gaps in the distribution, e.g., for chl. 
+
+The scatterplot of chl and bmi for each imputed data set in Figure 4 is created by
+
+```{r}
+xyplot(imp, bmi ~ chl | .imp, pch = 20, cex = 1.4)
+```
+
+```{r}
+fit <- with(imp, lm(chl ~ age + bmi))
+```
+
+
+```{r}
+mice::pool(fit)
+```
+
+```{r}
+summary(mice::pool(fit))
+```
+This table contains the results that can be reported. After multiple imputation, we find
+a significant effect for both age and bmi. The column fmi contains the fraction of missing information, i.e. the proportion of the variability that is attributable to the uncertainty caused by the missing data. Note that the actual results obtained may differ since they will depend on the seed argument of the mice() function.
+
+```{r}
+data(nhanes)
+imp <- mice(nhanes)
+fit <- lm.mids(bmi~hyp+chl,data=imp)
+mice::pool(fit)
+```
+
+```{r}
+library(mice)
+# which vcov methods can R find
+methods(vcov)
+
+#
+imp <- mice(nhanes)
+fit <- with(data=imp,exp=lm(bmi~hyp+chl))
+mice::pool(fit)
+```
+
+```{r}
+library("Amelia")
+data(freetrade)
+amelia.out <- amelia(freetrade, m = 15, ts = "year", cs = "country")
+
+library("Zelig")
+zelig.fit <- zelig(tariff ~ pop + gdp.pc + year + polity, data = amelia.out$imputations, model = "ls", cite = FALSE)
+summary(zelig.fit)
+```
+
+```{r}
+library("mice")
+imp.data <- do.call("rbind", amelia.out$imputations)
+imp.data <- rbind(freetrade, imp.data)
+imp.data$.imp <- as.numeric(rep(c(0:15), each = nrow(freetrade)))
+mice.data <- as.mids(imp.data, .imp = ncol(imp.data), .id = NULL)
+
+mice.fit <- with(mice.data, lm(tariff ~ polity + pop + gdp.pc + year))
+mice.res <- summary(mice::pool(mice.fit, method = "rubin1987"))
+mice.res
+```
+
+```{r}
+pool.r.squared(mice.fit)
+
+mice.fit2 <- with(mice.data, lm(tariff ~ polity + pop + gdp.pc))
+pool.compare(mice.fit, mice.fit2, method = "Wald")$pvalue
+```
+
+
