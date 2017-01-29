@@ -18,7 +18,6 @@ We start by downloading the raw data using the link provided by the instructor. 
 
 ### 1. Load the data
 
-
 #### Downloading and unpacking raw data file
 
 ```{r}
@@ -47,6 +46,7 @@ extPath <- file.path(baseLoc, "extdata")
 baseLoc
 extPath
 ```
+
 
 #### Saving the dataset to `data`
 Reads the CSV raw data file from `inst/extdata` and save it under `data`. Then remove it from memory.
