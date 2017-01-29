@@ -11,7 +11,7 @@
   \item{interval}{Identifier for the 5-minute interval in which measurement was taken}
 }}
 \usage{
-activity
+data(activity)
 }
 \description{
 Steps monitoring device data from 2012

@@ -2,7 +2,6 @@
 
 export(downloadZip)
 export(ggplot_missing)
-export(hello)
 export(info.imp)
 export(nas.complete)
 export(nas.count)

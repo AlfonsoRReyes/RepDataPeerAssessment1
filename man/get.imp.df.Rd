@@ -6,6 +6,13 @@
 \usage{
 get.imp.df(x, mice.imp, uniVar)
 }
+\arguments{
+\item{x}{data frame}
+
+\item{mice.imp}{is an object of mice imputation}
+
+\item{uniVar}{is the variable to look into}
+}
 \description{
 Get a complete data frame including the imputed values
 }
