@@ -1,6 +1,3 @@
-utils::suppressForeignCheck(c("x.values", "y.values", "value", "."))
-
-
 
 #' Gets the number of NAs
 #'
@@ -102,27 +99,19 @@ nas.plot.frequency <- function(df, na.var, step = 30, ylim = 0) {
 
 
 
-# ## Put this in the same source file (to remind you that you did it) add:
-# if(getRversion() >= "2.15.1")  utils::globalVariables(
-#   # needed by function ggplot_missing()
-#   c("x.values", "y.values", ".", "value"
-#   )
-# )
-
 #' A function that plots missingness.
 #'    Works only for dataframes with more than 1 variable
 #'
 #' @param x data.frame
 #'
-#' @import magrittr
-#' @import ggplot2
-#' @import reshape2
+#' @importFrom magrittr %>%
+#' @importFrom ggplot2 aes geom_raster ggplot theme_minimal
+#'             scale_fill_grey theme labs element_text
+#' @importFrom reshape2 melt
+#'
 #' @export
 #'
 ggplot_missing <- function(x){
-
-  # library(reshape2)
-  # library(ggplot2)
 
   x %>%
     is.na %>%
@@ -137,5 +126,24 @@ ggplot_missing <- function(x){
     theme(axis.text.x  = element_text(angle=45, vjust=0.5)) +
     labs(x = "Variables in Dataset",
          y = "Rows / observations")
+}
+
+#' Assigns a random value to a vector
+#'
+#' The random values are sampled from the completed cases.
+#'
+#' @param a is a vector of completed and NA observations
+#' @return a completed vector with random values
+#' @export
+#'
+random.imp <- function (a){
+  missing <- is.na(a)        # logical vector. TRUE for NAs
+  n.missing <- sum(missing)  # number of missing values
+  a.obs <- a[!missing]       # vector of GOOD values
+  imputed <- a               # copy of original vector
+
+  # Take a sample from GOOD part of the vector and replace missing elements
+  imputed[missing] <- sample (a.obs, n.missing, replace=TRUE)
+  return (imputed)           # return complete vector
 }
 
