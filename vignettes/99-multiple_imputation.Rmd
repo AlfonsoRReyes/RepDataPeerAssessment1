@@ -74,6 +74,16 @@ actbycol <- cast(activity, date ~ interval)
 actbycol <- cast(activity, date ~ interval, value = "steps")
 ```
 
+```{r}
+# saving actbycol with another name
+intervals <- actbycol
+save(intervals, file = "../data/intervals.RData")
+```
+
+```{r}
+intervals
+```
+
 
 ```{r results='hold'}
 cat("# of variables:", (ncol(actbycol)), "\t")

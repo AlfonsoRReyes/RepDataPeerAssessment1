@@ -4,7 +4,7 @@
 \name{intervals}
 \alias{intervals}
 \title{Activity data by intervals}
-\format{An object of class \code{cast_df} (inherits from \code{data.frame}) with 61 rows and 289 columns.}
+\format{a data frame derivative of activity}
 \usage{
 data(intervals)
 }
