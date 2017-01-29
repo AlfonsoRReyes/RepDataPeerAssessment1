@@ -43,7 +43,7 @@ downloadZip <- function(fileUrl, outDir="./data") {
 
 ```{r}
 fileUrl <- "https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2Factivity.zip"
-outDir <- "../inst/extdata"             # folder for raw data
+outDir <- project.extdata             # folder for raw data
 downloadZip(fileUrl, outDir = outDir)   # download and unpack zip file
 ```
 
@@ -68,8 +68,9 @@ getwd()
 Reads the CSV raw data file from `inst/extdata` and save it under `data`. Then remove it from memory.
 ```{r}
 # save the dataset in the pkg base
-act <- read.csv(paste(extPath, "activity.csv", sep = "/"))
-save(act, file=paste(dataPath, "act.RData", sep = "/"))
+act <- read.csv(paste(project.extdata, "activity.csv", sep = "/"))
+save(act, file=paste(project.data, "act.RData", sep = "/"))
+act
 # rm(activity)
 ```
 
