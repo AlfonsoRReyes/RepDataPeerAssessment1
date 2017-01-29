@@ -84,6 +84,12 @@ save(intervals, file = "../data/intervals.RData")
 intervals
 ```
 
+```{r}
+plot(intervals$date, intervals$`1500`, col = "blue")
+points(intervals$date, intervals$`1510`, col = "green")
+```
+
+
 
 ```{r results='hold'}
 cat("# of variables:", (ncol(actbycol)), "\t")
