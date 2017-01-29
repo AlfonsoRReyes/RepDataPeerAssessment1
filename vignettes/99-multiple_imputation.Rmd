@@ -35,8 +35,6 @@ sd(x, na.rm = TRUE) / sqrt(sum(!is.na(x)))
 
 Generate 15 samples of new data replacing the NA elements with values extracted from the GOOD values.
 
-
-
 ```{r}
 na.count <- length(x[is.na(x) == TRUE])    # calculate the # of NAs
 
@@ -60,6 +58,7 @@ data(activity)
 ```
 
 ### Renaming `steps` as `values`
+This is not really necessary because we can specify `values` in the function.
 ```{r}
 #activity$interval <- as.factor(activity$interval)
 names(activity) <- c("value", "date", "interval")
@@ -68,6 +67,10 @@ actbycol <- cast(activity, date ~ interval)
 
 ### Keeping original variable names
 ```{r}
+# this data frame has the following form:
+# date  interval_1  interval_2  interval_3 ... interval_n
+#         step_11                                 step_1n
+#         step_21                                 step_2n
 actbycol <- cast(activity, date ~ interval, value = "steps")
 ```
 
@@ -76,9 +79,17 @@ actbycol <- cast(activity, date ~ interval, value = "steps")
 cat("# of variables:", (ncol(actbycol)), "\t")
 cat("# of intervals:", (ncol(actbycol)-1))
 cat("\n")
-mysample <- actbycol[sample(1:nrow(actbycol), 10, replace=FALSE), c(1:7, 283:289)]
+```
+
+```{r}
+# take a sample of the original data frame
+mysample <- actbycol[sample(1:nrow(actbycol), 
+                            10, 
+                            replace=FALSE), 
+                     c(1:7, 283:289)]
 mysample
 ```
+
 
 ```{r}
 splice <- list(rows = c(1:5, 57:61), cols = c(1:5, 286:289))
