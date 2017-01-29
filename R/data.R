@@ -15,3 +15,18 @@
 #'
 #'
 "activity"
+
+
+
+#' Activity data by intervals
+#'
+#' Intervals are the columns, dates (rows), steps as values.
+#'
+#' @docType data
+#' @usage data(intervals)
+#'
+#'
+#' @keywords datasets
+#'
+#'
+"intervals"
