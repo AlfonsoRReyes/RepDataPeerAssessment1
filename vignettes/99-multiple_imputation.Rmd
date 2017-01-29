@@ -35,8 +35,6 @@ sd(x, na.rm = TRUE) / sqrt(sum(!is.na(x)))
 
 Generate 15 samples of new data replacing the NA elements with values extracted from the GOOD values.
 
-
-
 ```{r}
 na.count <- length(x[is.na(x) == TRUE])    # calculate the # of NAs
 
@@ -60,6 +58,7 @@ data(activity)
 ```
 
 ### Renaming `steps` as `values`
+This is not really necessary because we can specify `values` in the function.
 ```{r}
 #activity$interval <- as.factor(activity$interval)
 names(activity) <- c("value", "date", "interval")
