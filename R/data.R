@@ -47,6 +47,7 @@
 #' Activity data by intervals
 #'
 #' Intervals are the columns, dates (rows), steps as values.
+#' Data frame of 61x289
 #'
 #' @docType data
 #'
@@ -58,3 +59,20 @@
 #'
 #'
 "intervals"
+
+
+#' Activity data by intervals with date as rownames
+#'
+#' Intervals are the columns, steps are values. The date is rownames.
+#' Data frame of 61x288. The date as rownames.
+#'
+#' @docType data
+#'
+#' @usage data(intervals)
+#'
+#' @format a data frame derivative of activity
+#'
+#' @keywords datasets
+#'
+#'
+"intervals.only"

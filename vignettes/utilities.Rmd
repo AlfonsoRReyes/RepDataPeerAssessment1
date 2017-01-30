@@ -1,0 +1,26 @@
+---
+title: "utilities"
+output: html_notebook
+---
+
+## Convert column to row names
+`intervals` has the first column as the day of the observation and that makes the data frame uneven from the point of view of the intervals; they should be 288 but with the date they add up to 289.
+
+```{r}
+library(RepDataPeerAssessment1)
+
+data(intervals)
+intervals
+```
+
+```{r}
+intervals.only <- intervals[, -1]
+rownames(intervals.only) <- intervals[, 1]
+intervals.only
+```
+
+```{r}
+# save the intervals data frame where the date is set up as rownames
+save(intervals.only, file=paste(project.data, "intervals.only.rda", sep = "/"))
+```
+
