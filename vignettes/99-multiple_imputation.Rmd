@@ -1,8 +1,8 @@
 ---
 title: "Multiple Imputation"
 output:
-  html_document: default
   html_notebook: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE, error=TRUE, message=FALSE}
@@ -49,13 +49,19 @@ imp
 ## Applying the concept to the `activity` dataset
 The dataset has to be transformed and put the intervals as variables and the steps as values. The date is the ID or index.
 
-```{r}
-library(reshape)
+```{r echo=TRUE}
+library(reshape2)
 library(RepDataPeerAssessment1)
 
-data(activity)
-
+# data(activity)
+str(activity)
+activity
 ```
+
+```{r}
+head(activity)
+```
+
 
 ### Renaming `steps` as `values`
 This is not really necessary because we can specify `values` in the function.
