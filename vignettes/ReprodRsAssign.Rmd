@@ -85,28 +85,6 @@ activity
 ```
 
 
-```{r}
-e <- new.env(parent = emptyenv())
-load(paste(project.data, "activity.RData", sep = "/"))
-```
-
-```{r}
-str(activity)
-e$myFile <- activity
-```
-
-```{r}
-do.call("save", c(ls(envir = e), list(envir = e, file = "activity.RData")))
-```
-
-
-```{r}
-rm(activity)
-data(activity)
-# str(activity)
-activity
-```
-
 
 Confirm it has been saved:
 ```{r}
