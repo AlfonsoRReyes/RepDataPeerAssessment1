@@ -3,6 +3,8 @@ title: "imputeTestbench pkg"
 output: html_notebook
 ---
 
+Source: https://github.com/neerajdhanraj/imputeTestbench/blob/master/Manuscript%20imputeTestbench.pdf
+
 The default dataset if dataIn = NULL is nottem, a time series object of average
 air temperatures recorded at Nottingham Castle from 1920 to 1930. This dataset is included with the base datasets package.
 
@@ -58,5 +60,28 @@ plot_errors(ex, plotType = 'line')
 
 ```{r}
 plot_impute(methods = c("na.mean", "na.locf", "na.approx"), missPercent = 90)
+```
+
+## Sample
+Source: http://www.neerajbokde.com/cran/imputetestbench
+
+```{r}
+datax <- c(1:5,1:5,1:5,1:5,1:5,1:5,1:5,1:5,1:5,1:5,1:5,1:5,1:5,1:5,1:5,1:5,1:5,1:5,1:5,1:5,1:5)
+datax
+```
+
+```{r}
+library(imputeTestbench)
+
+q <- impute_errors(datax)
+q
+```
+
+```{r}
+plot_errors(q)
+```
+
+```{r}
+plot_errors(dataIn = q, plotType = "line")
 ```
 
