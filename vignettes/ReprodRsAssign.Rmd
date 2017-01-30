@@ -79,7 +79,7 @@ activity
 ```
 
 ```{r}
-# rm(activity)
+rm(activity)
 load(paste(project.data, "activity.RData", sep = "/"))
 activity
 ```
@@ -106,16 +106,6 @@ library(RepDataPeerAssessment1)
 data("activity")
 activity
 ```
-
-
-```{r}
-activity.env <- environment()
-load(paste(project.data, "activity.rda", sep = "/"), 
-     envir = activity.env)
-activity.fit1 <- activity.env$activity
-head(activity.fit1)
-```
-
 
 
 
