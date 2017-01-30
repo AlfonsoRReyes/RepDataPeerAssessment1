@@ -1,0 +1,62 @@
+---
+title: "imputeTestbench pkg"
+output: html_notebook
+---
+
+The default dataset if dataIn = NULL is nottem, a time series object of average
+air temperatures recorded at Nottingham Castle from 1920 to 1930. This dataset is included with the base datasets package.
+
+```{r}
+library(imputeTestbench)
+set.seed(123)
+
+a <- impute_errors()
+a
+```
+
+The errprof object is a list with seven elements. The ﬁrst element, Parameter, is a character string
+of the error metric used for comparing imputation methods. The second element, MissingPercent, is
+a numeric vector of the missing percentages that were evaluated in the input dataset. The remaining
+ﬁve elements show the average error for each imputation method at each interval of missing data
+in MissingPercent. The averages at each interval are based on the repetitions speciﬁed in the initial
+call to impute_errors() where the default is Repetition = 1 . Although the print method for the
+errprof object returns a list, the object stores the unique error estimates for every imputation method,
+repetition, and missing data interval. These values are used to estimate the averages in the printed
+output and to plot the distribution of errors with plot_errors() shown below. 
+
+```{r}
+plot_errors(a)
+```
+
+```{r}
+plot_errors(a, plotType = 'line')
+```
+
+
+```{r}
+plot_impute(showmiss = T)
+```
+
+## Demonstration of imputeTestbench with examples
+The austres dataset is a ts object of Australian population in thousands, measured quarterly
+from 1971 to 1994 (Brockwell and Davis, 1996). The plot_errors() function shows that all imputation
+methods had larger error values with additional missing observations, as expected, and that the
+na.mean imputation method had the largest error values. Differences between the error values can
+be understood by viewing a sample of the imputed data with plot_impute(). The example belows
+shows an example of imputed values using the na.approx, na.locf, and na.mean functions at 10%
+and 90% missing observations using MCAR sampling.
+
+```{r}
+aus <- datasets::austres
+ex <- impute_errors((dataIn = aus))
+ex
+```
+
+```{r}
+plot_errors(ex, plotType = 'line')
+```
+
+```{r}
+plot_impute(methods = c("na.mean", "na.locf", "na.approx"), missPercent = 90)
+```
+
