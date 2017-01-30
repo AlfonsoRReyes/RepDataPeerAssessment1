@@ -1,0 +1,54 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+
+```{r}
+library(RepDataPeerAssessment1)
+
+data(intervals)
+intervals
+```
+
+```{r}
+matplot(y = actbycol, type = 'l', lty = 1)
+```
+
+
+
+```{r}
+form <- as.formula(paste(paste(names(actbycol)[- 280],  
+                               collapse = ' + '),  
+                         'date',  sep = '~'))
+
+xyplot(form,  data = actbycol, outer = TRUE)
+```
+
+
+
+```{r}
+library(lattice)
+
+df <- data.frame(time = 1:10,
+                 a = cumsum(rnorm(10)),
+                 b = cumsum(rnorm(10)),
+                 c = cumsum(rnorm(10)))
+
+form <- as.formula(paste(paste(names(df)[- 1],  
+                               collapse = ' + '),  
+                         'time',  sep = '~'))
+
+xyplot(form,  data = df,  type = 'b',  outer = TRUE)
+```
+
+
+```{r}
+plot.ts(actbycol)
+```
+
+
+```{r}
+plot(intervals$date, intervals$`1500`, col = "blue")
+points(intervals$date, intervals$`1510`, col = "green")
+```
