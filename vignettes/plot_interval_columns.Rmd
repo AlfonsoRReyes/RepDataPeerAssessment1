@@ -27,6 +27,14 @@ intervals.na.not <- intervals[ok,]
 intervals.na.not
 ```
 
+```{r}
+# summing up the rows looking for any observation that is all zeros. The minimum is 41 steps and maximum for the whole day is 21, 194.
+
+rowSums(intervals.na.not[2:289])
+min(rowSums(intervals.na.not[2:289]))
+max(rowSums(intervals.na.not[2:289]))
+```
+
 
 ```{r}
 intervals.m <- data.matrix(intervals.na.not)
