@@ -35,8 +35,16 @@ str(intervals.m)
 ```
 
 ```{r}
-intervals.m[, 1:2]
+head(intervals.m[, 1:2])
 ```
+
+```{r}
+cols <- seq(2, 289)
+heatmap(intervals.m[, cols], Colv = NA, Rowv = NA)
+
+```
+
+
 
 
 ```{r fig.asp=1}
@@ -46,9 +54,24 @@ heatmap(intervals.m[, 261:289], Colv = NA, Rowv = NA)
 ```
 
 ```{r}
+intervals.na.not
+```
+
+
+```{r}
 cc <- rainbow(74, start = 0, end = .3)
 
 heatmap(intervals.m[, 2:75], Colv = NA, ColSideColors = cc)
+```
+
+
+
+```{r}
+cols <- seq(2, 289)
+image(intervals.m[, cols], 
+      col = grey(seq(0, 1, length = 256)),
+      # col = heat.colors(12)
+      )
 ```
 
 
