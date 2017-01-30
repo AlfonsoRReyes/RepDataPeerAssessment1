@@ -108,11 +108,9 @@ activity
 ```
 
 
-
 ```{r}
 data(intervals)
-inter <- intervals
-inter
+intervals
 ```
 
 
@@ -137,35 +135,6 @@ str(activity)
 summary(activity)
 ```
 
-```{r}
-
-```
-
-
-
-
-```{r}
-save(activity, file = paste(project.data, "activity.RData", sep = "/"))
-rm(activity)      # remove from memory
-load(paste(project.data, "activity.RData", sep = "/"))
-# data(activity)    # reload 
-activity
-str(activity)
-```
-```{r}
-file.remove(paste(project.data, "activity.RData", sep = "/"))
-```
-
-
-
-```{r}
-
-```
-
-
-```{r}
-activity
-```
 
 
 ## B. What is mean total number of steps taken per day?
