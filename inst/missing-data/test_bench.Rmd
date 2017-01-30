@@ -85,3 +85,50 @@ plot_errors(q)
 plot_errors(dataIn = q, plotType = "line")
 ```
 
+```{r}
+attr(q, 'errall')
+```
+
+```{r}
+library(RepDataPeerAssessment1)
+
+data("activity")
+activity
+```
+
+
+```{r}
+ok <- complete.cases(activity$steps)
+st <- activity$steps[ok]
+length(st)
+```
+
+```{r}
+library(imputeTestbench)
+
+itb <- impute_errors(st)
+itb
+```
+
+```{r}
+plot_errors(itb)
+```
+
+```{r}
+plot_errors(dataIn = itb, plotType = "line")
+```
+
+
+```{r}
+plot_impute(methods = c("na.mean", "na.locf", "na.approx"), missPercent = 10)
+```
+
+```{r}
+err_mape <- impute_errors(st, errorParameter = "mae")
+err_mape
+```
+
+```{r}
+plot_errors(dataIn = err_mape, plotType = "line")
+```
+
