@@ -1,8 +1,8 @@
 ---
 title: "Multiple Imputation"
 output:
-  html_document: default
   html_notebook: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE, error=TRUE, message=FALSE}
@@ -49,21 +49,17 @@ imp
 ## Applying the concept to the `activity` dataset
 The dataset has to be transformed and put the intervals as variables and the steps as values. The date is the ID or index.
 
-```{r}
+```{r echo=TRUE}
 library(reshape)
 library(RepDataPeerAssessment1)
 
-data(activity)
-
+# data(activity)
+str(activity)
+activity
 ```
 
 ### Renaming `steps` as `values`
 This is not really necessary because we can specify `values` in the function.
-```{r}
-#activity$interval <- as.factor(activity$interval)
-names(activity) <- c("value", "date", "interval")
-actbycol <- cast(activity, date ~ interval)
-```
 
 ### Keeping original variable names
 ```{r}
@@ -71,18 +67,18 @@ actbycol <- cast(activity, date ~ interval)
 # date  interval_1  interval_2  interval_3 ... interval_n
 #         step_11                                 step_1n
 #         step_21                                 step_2n
+#
 actbycol <- cast(activity, date ~ interval, value = "steps")
 ```
 
 ```{r}
 # saving actbycol with another name
 intervals <- actbycol
-save(intervals, file = "../data/intervals.RData")
+save(intervals, file = paste(project.data, "intervals.RData"), sep = "/")
 ```
 
-```{r}
-intervals
-```
+
+
 
 
 ```{r results='hold'}
