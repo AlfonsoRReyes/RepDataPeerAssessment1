@@ -50,7 +50,7 @@ imp
 The dataset has to be transformed and put the intervals as variables and the steps as values. The date is the ID or index.
 
 ```{r echo=TRUE}
-library(reshape2)
+library(reshape)
 library(RepDataPeerAssessment1)
 
 # data(activity)
@@ -58,18 +58,8 @@ str(activity)
 activity
 ```
 
-```{r}
-head(activity)
-```
-
-
 ### Renaming `steps` as `values`
 This is not really necessary because we can specify `values` in the function.
-```{r}
-#activity$interval <- as.factor(activity$interval)
-names(activity) <- c("value", "date", "interval")
-actbycol <- cast(activity, date ~ interval)
-```
 
 ### Keeping original variable names
 ```{r}
@@ -77,6 +67,7 @@ actbycol <- cast(activity, date ~ interval)
 # date  interval_1  interval_2  interval_3 ... interval_n
 #         step_11                                 step_1n
 #         step_21                                 step_2n
+#
 actbycol <- cast(activity, date ~ interval, value = "steps")
 ```
 
