@@ -37,6 +37,10 @@ info.imp <- function(x, uniVar, colName, decs = 3) {
 
 #' Get a complete data frame including the imputed values
 #'
+#' @param x data frame
+#' @param mice.imp is an object of mice imputation
+#' @param uniVar is the variable to look into
+#'
 get.imp.df <- function(x, mice.imp, uniVar) {
   imp.df <- x
   indNA <- which(is.na(x[, uniVar]))            # which rows are NA

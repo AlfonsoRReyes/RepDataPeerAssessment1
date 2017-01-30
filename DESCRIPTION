@@ -6,6 +6,7 @@ Author: Alfonso R. Reyes
 Maintainer: The package maintainer <alfonso.r.reyes@gmail.com>
 Description: Intention is to get more acquinted with developing R packages.
     Will use this Reproducible Research Assignment to practice R package dev.
+Depends: R (>= 3.1.0)    
 License: CC0
 Encoding: UTF-8
 LazyData: true

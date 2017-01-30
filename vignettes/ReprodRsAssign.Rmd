@@ -21,6 +21,19 @@ We start by downloading the raw data using the link provided by the instructor. 
 #### Downloading and unpacking raw data file
 
 ```{r}
+library(RepDataPeerAssessment1)
+library(rprojroot)
+
+project.data <- find_package_root_file('data')
+project.extdata <- find_package_root_file('inst/extdata')
+project.R <- find_package_root_file('R')
+project.data
+project.R
+project.extdata
+```
+
+
+```{r}
 downloadZip <- function(fileUrl, outDir="./data") {
   temp <- tempfile()
   download.file(fileUrl, temp, mode = "wb")
@@ -31,36 +44,51 @@ downloadZip <- function(fileUrl, outDir="./data") {
 
 ```{r}
 fileUrl <- "https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2Factivity.zip"
-outDir <- "../inst/extdata"             # folder for raw data
+outDir <- project.extdata             # folder for raw data
 downloadZip(fileUrl, outDir = outDir)   # download and unpack zip file
 ```
 
 
 #### Create the RData file
-More RData file may be generated during this assignment. They will be placed under the folder `data`.
+More RData files may be generated during this assignment. They will be placed under the folder `data`.
 
-```{r, results='hold'}
-# get the base folder and raw data folder
-baseLoc <- system.file(package="RepDataPeerAssessment1")
-extPath <- file.path(baseLoc, "extdata")
-baseLoc
-extPath
-```
 
 
 #### Saving the dataset to `data`
 Reads the CSV raw data file from `inst/extdata` and save it under `data`. Then remove it from memory.
 ```{r}
 # save the dataset
-activity <- read.csv(paste(extPath, "activity.csv", sep = "/"))
-save(activity, file="../data/activity.RData")
-rm(activity)
+activity.raw <- read.csv(paste(project.extdata, "activity.csv", sep = "/"))
+save(activity.raw, file=paste(project.data, "activity.raw.RData", sep = "/"))
+activity.raw
 ```
+
+** Convert variable `date` as.factor to `as.date` **
+```{r}
+activity <- activity.raw
+activity$date <- as.Date(activity.raw$date)
+str(activity) 
+```
+
+
+
+```{r}
+# save the dataset
+save(activity, file=paste(project.data, "activity.RData", sep = "/"))
+activity
+```
+
+```{r}
+rm(activity)
+load(paste(project.data, "activity.RData", sep = "/"))
+activity
+```
+
+
 
 Confirm it has been saved:
 ```{r}
-# this will work after at least a data file has been saved to this folder
-system.file(file="data", package="RepDataPeerAssessment1")
+file.exists(paste(project.data, "activity.RData", sep = "/"))
 ```
 
 ### 2. Process and transform
@@ -76,8 +104,15 @@ Process/transform the data (if necessary) into a format suitable for the analysi
 ```{r message=FALSE}
 library(RepDataPeerAssessment1)
 data("activity")
-head(activity)
+activity
 ```
+
+
+```{r}
+data(intervals)
+intervals
+```
+
 
 **<u>Show dimensions</u>**
 ```{r}
@@ -100,13 +135,7 @@ str(activity)
 summary(activity)
 ```
 
-** Convert variable `date` as.factor to `as.date` **
 
-```{r}
-activity$date <- as.Date(activity$date)
-save(activity, file="../data/activity.RData")      # save the modified dataset
-str(activity)                                      # confirm the new structure
-```
 
 ## B. What is mean total number of steps taken per day?
 We will ignore the NAs in this part of the assignment. 
@@ -117,7 +146,10 @@ We will ignore the NAs in this part of the assignment.
 # get only observations that are not NA
 complete <- complete.cases(activity)
 activity.cases <- activity[complete, ]
+activity.NAs <- activity[!complete, ]       # NAs
+activity.NAs.not <- activity.cases
 dim(activity.cases)
+dim(activity.NAs)
 ```
 
 ```{r fig.asp=1}
