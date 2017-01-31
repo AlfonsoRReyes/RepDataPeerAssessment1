@@ -77,3 +77,8 @@ summary(iris)
 colMeans(is.na(iris))
 ```
 
+```{r}
+library("VIM")
+aggr(iris)
+```
+
