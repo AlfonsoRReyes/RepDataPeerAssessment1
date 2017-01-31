@@ -1,0 +1,52 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+## Datasets
+
+```{r}
+iris
+```
+
+```{r}
+summary(iris)
+```
+
+```{r}
+library(RepDataPeerAssessment1)
+library(rprojroot)
+
+project.data <- find_package_root_file('data')
+project.extdata <- find_package_root_file('inst/extdata')
+project.R <- find_package_root_file('R')
+project.data
+project.R
+project.extdata
+```
+
+## Read ecoli dataset
+Source: https://www.r-bloggers.com/classification-trees/
+
+
+```{r}
+ecoli <- read.table(paste(project.extdata, "ecoli.data", sep = "/"))
+ecoli
+```
+
+```{r}
+names(ecoli) <- c("Sequence", "mcv", "gvh", "lip", "chg", "aac", "alm1", "alm2", "class")
+ecoli
+```
+
+```{r}
+save(ecoli, file = paste(project.extdata, "ecoli.rda", sep = "/"))
+```
+
+```{r}
+xtabs(~ class, data = ecoli)
+```
+
+## Step 1: Introduce MCAR NAs
+Missing Completely at Random
+
