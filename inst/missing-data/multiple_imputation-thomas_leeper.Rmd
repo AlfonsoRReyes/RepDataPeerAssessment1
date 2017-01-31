@@ -73,7 +73,14 @@ grandse
 
 The resulting standard error is interesting because we increase the precision of our estimate by using 10 rather than 7 values (and standard errors are proportionate to sample size), but is larger than our original standard error because we have to account for uncertainty due to imputation. Thus if our missing values are truly missing at random, we can get a better estimate that is actually representative of our original population. Most multiple imputation algorithms are, however, applied to multivariate data rather than a single data vector and thereby use additional information about the relationship between observed values and missingness to reach even more precise estimates of target parameters.
 
+## R packages for imputation
 There are three main R packages that offer multiple imputation techniques. Several other packages - described in the OfficialStatistics Task View - supply other imputation techniques, but packages Amelia (by Gary King and collaborators), mi (by Andrew Gelman and collaborators), and mice (by Stef van Buuren and collaborators) provide more than enough to work with. Let's start by installing these packages:
+
+```{r}
+install.packages(c("Amelia", "mi", "mice"), repos = "http://cran.r-project.org")
+```
+
+
 
 ```{r}
 set.seed(10)
@@ -82,11 +89,10 @@ x1 <- runif(100, 0, 5)
 x2 <- rnorm(100)
 y <- x1 + x2 + rnorm(100)
 mydf <- cbind.data.frame(x1, x2, y)
+mydf
 ```
 
-
 Now, let's randomly remove some of the observed values of the independent variables:
-
 ```{r}
 mydf$x1[sample(1:nrow(mydf), 20, FALSE)] <- NA
 mydf$x2[sample(1:nrow(mydf), 10, FALSE)] <- NA
@@ -98,8 +104,7 @@ The result is the removal of thirty values, 20 from x1 and 10 from x2:
 summary(mydf)
 ```
 
-If we estimate the regression on these data, R will force casewise deletion of 28 cases:
-
+If we estimate the regression on these data, R will force casewise deletion of 28/29 cases:
 ```{r}
 lm <- lm(y ~ x1 + x2, data = mydf)
 summary(lm)
@@ -107,6 +112,7 @@ summary(lm)$coef[, 1:2]
 ```
 
 We should thus be quite skeptical of our results given that we're discarding a substantial portion of our observations (28%, in fact). Let's see how the various multiple imputation packages address this and affect our inference.
+
 
 ## Amelia
 
@@ -128,6 +134,7 @@ lm.amelia.out <- lapply(imp.amelia$imputations, function(i) lm(y ~ x1 + x2,
 lm.amelia.out
 ```
 
+To aggregate across the results is a little bit tricky because we have to extract the coefficients and standard errors from each model, format them in a particular way, and then feed that structure into the mi.meld function:
 ```{r}
 coefs.amelia <- do.call(rbind, lapply(lm.amelia.out, function(i) coef(summary(i))[, 
     1]))
@@ -137,7 +144,6 @@ mi.meld(coefs.amelia, ses.amelia)
 ```
 
 Now let's compare these results to those of our original model:
-
 ```{r}
 t(do.call(rbind, mi.meld(coefs.amelia, ses.amelia)))
 ```
@@ -151,12 +157,12 @@ coef(summary(lm))[, 1:2]  # original results
 ```{r}
 library(mi)
 
-
 mi.mydf <- missing_data.frame(mydf)
 image(mi.mydf)
-
 ```
 
+
+We can then see some summary information about the dataset and the nature of the missingness:
 ```{r fig.asp=1}
 par(ask=F)
 hist(mi.mydf)
@@ -178,13 +184,17 @@ imp.mi <- mi(mi.mydf)
 ```
 
 ```{r}
-show(imp.mi)
+imp.mi
 ```
 
+
 The results above report how many imputed datasets were produced and summarizes some of the results we saw above. For linear regression (and several other common models), the mi package includes functions that automatically run the model on each imputed dataset and aggregate the results:
+```{r}
+```
+
 
 ```{r}
-lm.mi.out <- pool(y ~ x1 + x2, data = imp.mi)
+lm.mi.out <- mi::pool(y ~ x1 + x2, data = imp.mi)
 display(lm.mi.out)
 ```
 
@@ -194,6 +204,7 @@ coef.mi <- lm.mi.out@pooled_summary
 display(lm.mi.out)
 ```
 
+Let's compare these results to our original model:
 ```{r}
 do.call(cbind, coef.mi)  # multiply imputed results
 ```
@@ -204,7 +215,7 @@ coef(summary(lm))[, 1:2]  # original results
 
 
 ## mice
-
+To conduct the multiple imputation, we simply need to run the mice function:
 ```{r}
 library(mice)
 
@@ -217,21 +228,25 @@ imp.mice <- mice(mydf)
 summary(imp.mice)
 ```
 
+To run our regression we use the lm function wrapped in a with call, which estimates our model on each imputed dataframe:
 ```{r}
 lm.mice.out <- with(imp.mice, lm(y ~ x1 + x2))
 summary(lm.mice.out)
 ```
 
+The results above are for each separate dataset. But, to pool them, we use pool:
 ```{r}
 pool.mice <- mice::pool(lm.mice.out)
 ```
 
-
-
+Let's compare these results to our original model:
 ```{r}
 summary(pool.mice)  # multiply imputed results
 ```
 
+```{r}
+coef(summary(lm))[, 1:2]  # original results
+```
 
 ## Comparing packages
 
@@ -239,6 +254,13 @@ summary(pool.mice)  # multiply imputed results
 s.amelia <- t(do.call(rbind, mi.meld(coefs.amelia, ses.amelia)))
 s.amelia
 ```
+
+mi package results
+
+```{r}
+coef.mi
+```
+
 
 ```{r}
 s.mi <- do.call(cbind, coef.mi)  # multiply imputed results
@@ -251,10 +273,30 @@ s.mice <- summary(pool.mice)[, 1:2]  # multiply imputed results
 s.mice
 ```
 
+Original results (case deletion)
+
+```{r}
+s.orig <- coef(summary(lm))[, 1:2]  # original results
+```
+
+Real results (before missingness was introduced)
+
+```{r}
+s.real <- summary(lm(y ~ x1 + x2))$coef[, 1:2]
+
+```
 
 
+Let's print the coefficients together to compare them:
 
+```{r}
+allout <- cbind(s.real[, 1], s.amelia[, 1], s.mi[, 1], s.mice[, 1], s.orig[, 
+    1])
+colnames(allout) <- c("Real Relationship", "Amelia", "MI", "mice", "Original")
+allout
+```
 
+All three of the multiple imputation models - despite vast differences in underlying approaches to imputation in the three packages - yield strikingly similar inference. This was a relatively basic and all of the packages offer a number of options for more complicated situations than what we examined here. While executing multiple imputation requires choosing a package and typing some potentially tedious code, the results are almost always going to be better than doing the easier thing of deleting cases and ignoring the consequences thereof.
 
 
 
