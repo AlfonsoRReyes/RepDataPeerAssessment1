@@ -78,7 +78,58 @@ colMeans(is.na(iris))
 ```
 
 ```{r}
-library("VIM")
-aggr(iris)
+library(VIM)
+aggr_plot <- aggr(iris, col=c('navyblue','red'), numbers=TRUE, sortVars=TRUE, labels=names(data), cex.axis=.7, gap=3, ylab=c("Histogram of missing data","Pattern"))
+
+```
+
+```{r}
+library(mice)
+library(VIM)
+
+md.pattern(iris)
+```
+
+```{r}
+md.pairs(iris)
+```
+
+```{r}
+marginplot(iris[c(1,2)])
+```
+
+```{r}
+imp1 <- mice(iris)
+```
+
+```{r}
+imp1
+```
+
+```{r}
+imp1$imp$Sepal.Length
+```
+
+```{r}
+# appending multiple imputations datasets to original dataset
+# .imp variable contains the number of dataset with `0` being the original
+# there will be 150 * (5+1) = 900 rows
+#
+imp_tot2 <- complete(imp1, 'long', inc=TRUE)
+imp_tot2
+```
+
+
+```{r}
+##labels observed data in blue and imputed data in red for y1
+col<-rep(c("blue", "red")[1+as.numeric(is.na(imp1$data$Sepal.Length))],6)
+
+##plots data for y1 by imputation
+stripplot(Sepal.Length~.imp, data=imp_tot2, jit=TRUE,col=col, xlab="imputation Number")
+```
+
+```{r}
+library(ggplot2)
+library(lattice)
 ```
 
