@@ -1,9 +1,75 @@
 ---
 title: "multiple imputation"
+author: "Thomas Leeper"
 output: html_notebook
 ---
 
 Source: http://thomasleeper.com/Rcourse/Tutorials/mi.html
+
+This tutorial covers techniques of multiple imputation. Multiple imputation is a strategy for dealing with missing data. Whereas we typically (i.e., automatically) deal with missing data through casewise deletion of any observations that have missing values on key variables, imputation attempts to replace missing values with an estimated value. In single imputation, we guess that missing value one time (perhaps based on the means of observed values, or a random sampling of those values). In multiple imputation, we instead draw multiple values for each missing value, effectively building multiple datasets, each of which replaces the missing data in a different way. There are numerous algorithms for this, each of which builds those multiple datasets in different ways. We're not going to discuss the details here, but instead focus on executing multiple imputation in R. The main challenge of multiple imputation is not the analysis (it simply proceeds as usual on each imputed dataset) but instead the aggregation of those separate analyses. The examples below discuss how to do this.
+
+To get a basic feel for the process, let's imagine that we're trying to calculate the mean of a vector of values that contains missing values. We can impute the missing values by drawing from the observed values, repeat the process several times, and then average across the estimated means to get an estimate of the mean with a measure of uncertainty that accounts for the uncertainty due to imputation. Let's create a vector of ten values, seven of which we observe and three of which are missing, and imagine that they are random draws from the population whose mean we're trying to estimate:
+
+
+```{r}
+set.seed(10)
+x <- c(sample(1:10, 7, TRUE), rep(NA, 3))
+x
+```
+We can find the mean using case deletion:
+
+```{r}
+mean(x, na.rm = TRUE)
+```
+
+Our estimate of the sample standard error is then:
+
+```{r}
+sd(x, na.rm = TRUE)/sqrt(sum(!is.na(x)))
+```
+
+Now let's impute several times to generate a list of imputed vectors:
+```{r}
+imp <- replicate(15, c(x[!is.na(x)], sample(x[!is.na(x)], 3, TRUE)), simplify = FALSE)
+imp
+```
+
+The result is a list of five vectors. The first seven values of each is the same as our original data, but the three missing values have been replaced with different combinations of the observed values. To get our new estimated maen, we simply take the mean of each vector, and then average across them:
+```{r}
+means <- sapply(imp, mean)
+means
+```
+
+```{r}
+grandm <- mean(means)
+grandm
+```
+
+The result is 4.147, about the same as our original estimate. To get the standard error of our multiple imputation estimate, we need to combine the standard errors of each of our estimates, so that means we need to start by getting the SEs of each imputed vector:
+
+```{r}
+ses <- sapply(imp, sd)/sqrt(10)
+```
+
+
+Aggregating the standard errors is a bit complicated, but basically sums the mean of the SEs (i.e., the “within-imputation variance”) with the variance across the different estimated means (the “between-imputation variance”). To calculate the within-imputation variance, we simply average the SE estimates:
+```{r}
+within <- mean(ses)
+```
+
+
+To calculate the between-imputation variance, we calculate the sum of squared deviations of each imputed mean from the grand mean estimate:
+```{r}
+between <- sum((means - grandm)^2)/(length(imp) - 1)
+```
+
+Then we sum the within- and between-imputation variances (multiply the latter by a small correction):
+
+```{r}
+grandvar <- within + ((1 + (1/length(imp))) * between)
+grandse <- sqrt(grandvar)
+grandse
+```
 
 The resulting standard error is interesting because we increase the precision of our estimate by using 10 rather than 7 values (and standard errors are proportionate to sample size), but is larger than our original standard error because we have to account for uncertainty due to imputation. Thus if our missing values are truly missing at random, we can get a better estimate that is actually representative of our original population. Most multiple imputation algorithms are, however, applied to multivariate data rather than a single data vector and thereby use additional information about the relationship between observed values and missingness to reach even more precise estimates of target parameters.
 
