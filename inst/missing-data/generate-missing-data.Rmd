@@ -3,6 +3,8 @@ title: "R Notebook"
 output: html_notebook
 ---
 
+Source: http://stats.stackexchange.com/questions/184741/how-to-simulate-the-different-types-of-missing-data
+
 ```{r}
 ##### generic data setup:
 set.seed(977) # this makes the simulation exactly reproducible
