@@ -11,6 +11,7 @@ iris
 
 ```{r}
 summary(iris)
+dim(iris)
 ```
 
 ```{r}
@@ -47,6 +48,32 @@ save(ecoli, file = paste(project.extdata, "ecoli.rda", sep = "/"))
 xtabs(~ class, data = ecoli)
 ```
 
-## Step 1: Introduce MCAR NAs
-Missing Completely at Random
+## Step 1: Introduce MCAR NAs in the `iris` dataset
+Missing Completely at Random filling using the uniform distribution.
+
+```{r}
+set.seed(971)
+y <- iris$Sepal.Length
+ni <- 150
+nj <- 1
+prop.m <- 0.05
+mcar <- runif(ni*nj, min = 0, max = 1)
+y.mcar <- ifelse(mcar < prop.m, NA, y)
+y.mcar
+mean(is.na(y.mcar))
+```
+
+```{r}
+iris$Sepal.Length <- y.mcar
+```
+
+```{r}
+mean(is.na(iris$Sepal.Length))
+summary(iris)
+```
+
+```{r}
+# find percentage NAs in all data frame columns
+colMeans(is.na(iris))
+```
 
