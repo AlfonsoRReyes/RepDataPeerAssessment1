@@ -322,47 +322,7 @@ plot_impute(steps.clean,
 
 #### 2.4. Apply selected imputation method to the original dataset
 We bring up the original data frame and get the vectors for the `steps` variable.
-We will use the package `mice` at this stage of the analysis.
-```{r}
-df  <- activity[, c("steps", "interval")]
-# length(steps)
-```
 
-```{r}
-library(mice)
-
-res.mice <- mice(df, method = "pmm")
-```
-
-We show here a dataframe of the replaced or imputed values:
-
-```{r}
-res.mice$imp$steps
-```
-
-Now, to show all the values, o bserved and imputed, we use the mice function complete(). It will show the first of the five dataframes of the multiple imputation. For the second dataframe just add an index at the end:
-
-```{r}
-mice.imp.1 <- mice::complete(res.mice, 1)
-mice.imp.1
-```
-
-```{r}
-stripplot(res.mice, pch = 20, cex = 1.2)
-```
-
-```{r, fig.asp=1}
-
-xyplot(res.mice, steps ~ interval | .imp, pch = 1, cex = 0.5, alpha = 0.5)
-```
-
-### 3. Create a dataset with missing values filled in
-Create a new dataset that is equal to the original dataset but with the missing data filled in.
-
-```{r}
-dim(mice.imp.1)
-summary(mice.imp.1)
-```
 
 
 ### 4. Make a histogram (with missing data filled in)
