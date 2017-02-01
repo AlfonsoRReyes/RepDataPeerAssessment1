@@ -1,7 +1,7 @@
 ---
 title: "Reproducible Research, Assignment 1"
 author: "Alfonso R. Reyes"
-date: "`r Sys.Date()`"
+date: '`r Sys.Date()`'
 output:
   html_document: default
   html_notebook: default
@@ -20,7 +20,7 @@ We start by downloading the raw data using the link provided by the instructor. 
 
 #### Downloading and unpacking raw data file
 
-```{r}
+```{r results='hold'}
 library(RepDataPeerAssessment1)
 library(rprojroot)
 
@@ -47,23 +47,23 @@ fileUrl <- "https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2Factivity.zip"
 outDir <- project.extdata             # folder for raw data
 downloadZip(fileUrl, outDir = outDir)   # download and unpack zip file
 ```
-
-
+\    
+     
 #### Create the RData file
 More RData files may be generated during this assignment. They will be placed under the folder `data`.
 
 
-
-#### Saving the dataset to `data`
+#### Saving the raw dataset to `data` folder
 Reads the CSV raw data file from `inst/extdata` and save it under `data`. Then remove it from memory.
 ```{r}
 # save the dataset
 activity.raw <- read.csv(paste(project.extdata, "activity.csv", sep = "/"))
 save(activity.raw, file=paste(project.data, "activity.raw.RData", sep = "/"))
-activity.raw
+head(activity.raw)
 ```
 
-** Convert variable `date` as.factor to `as.date` **
+
+**Convert the variable `date` as.factor to `as.date`**
 ```{r}
 activity <- activity.raw
 activity$date <- as.Date(activity.raw$date)
@@ -75,21 +75,19 @@ str(activity)
 ```{r}
 # save the dataset
 save(activity, file=paste(project.data, "activity.RData", sep = "/"))
-activity
+head(activity)
 ```
-
-```{r}
-rm(activity)
-load(paste(project.data, "activity.RData", sep = "/"))
-activity
-```
-
 
 
 Confirm it has been saved:
-```{r}
-file.exists(paste(project.data, "activity.RData", sep = "/"))
+```{r results='hold'}
+rm(activity)                                            # remove variable from memory
+load(paste(project.data, "activity.RData", sep = "/"))  # load data file
+head(activity)
+# file.exists(paste(project.data, "activity.RData", sep = "/"))  # we could use this too
 ```
+
+\    
 
 ### 2. Process and transform
 Process/transform the data (if necessary) into a format suitable for the analysis.
@@ -102,15 +100,10 @@ Process/transform the data (if necessary) into a format suitable for the analysi
 * Show summary
 
 ```{r message=FALSE}
-library(RepDataPeerAssessment1)
+library(RepDataPeerAssessment1)    #load my package
+
 data("activity")
-activity
-```
-
-
-```{r}
-data(intervals)
-intervals
+head(activity)
 ```
 
 
@@ -118,14 +111,13 @@ intervals
 ```{r}
 dim(activity)
 ```
-**<u>Names of the variables</u>**
 
+**<u>Names of the variables</u>**
 ```{r}
 names(activity)
 ```
 
 **<u>Structure</u>**
-
 ```{r}
 str(activity)
 ```
@@ -136,20 +128,20 @@ summary(activity)
 ```
 
 
-
-## B. What is mean total number of steps taken per day?
+## B. What is the mean total number of steps taken per day?
 We will ignore the NAs in this part of the assignment. 
 
 ### 1. Calculate the total number of steps taken per day
 
-```{r}
+```{r results='hold'}
 # get only observations that are not NA
 complete <- complete.cases(activity)
 activity.cases <- activity[complete, ]
 activity.NAs <- activity[!complete, ]       # NAs
 activity.NAs.not <- activity.cases
-dim(activity.cases)
-dim(activity.NAs)
+
+cat("# of observations:\t", dim(activity.cases)[1], "\n")
+cat("# of NAs:\t\t\t", dim(activity.NAs)[1], "\n")
 ```
 
 ```{r fig.asp=1}
@@ -269,15 +261,109 @@ nrow(activity.missing)
 ### 2. Complete missing values
 Devise a strategy for filling in all of the missing values in the dataset. The strategy does not need to be sophisticated. For example, you could use the mean/median for that day, or the mean for that 5-minute interval, etc.
 
-There are several ways we can complete the missing values. 
+There are several ways we can complete the missing values and lots of R packages available to perform the imputation. We will make it the easier way. This is the strategy:
 
+<u>Motivation</u>
 
+Since there is no way to compare in a dataset with missing values how a imputation method performs, after several attempts on resolving this, I found in the literature that the imputation method selection is done based on a dataset without any missing values first. 
 
+1. Using the dataset under analysis, we proceed to generate a new one but without any missing values.
 
+2. We apply several imputation methods on the new dataset but this time the missing values are entered under control, the amount and randomness which could be MCAR or MAR, among several others.
 
+3. The result of applying these methods will give us a performance plot of the methods used versus the Root Mean Squared Error (RMSE). We will chose the imputation method with the lowest RMSE.
 
-### 3. Create dataset with missing values filled in
+4. After selecting the imputation method, we go back to our original dataset with missing data and apply the imputation method with the best performance, as selected above.
+
+5. The result will be the data frame with imputed data.
+
+Since this topic needs not to be sophisticated at this stage, we will use a pretty straight forward R package called `imputTestbench`. It is available in CRAN. We will describe the steps in detail below.
+
+#### 2.1. Generate a new dataset but without missing values
+```{r}
+ok <- complete.cases(activity$steps)
+steps.clean <- activity$steps[ok]
+length(steps.clean)
+```
+
+#### 2.2. Apply several imputation methods
+
+```{r}
+library(imputeTestbench)
+
+itb <- impute_errors(steps.clean, 
+                     missPercentFrom = 0, missPercentTo = 10, 
+                     interval = 1, blckper = TRUE, blck = 10)
+
+itb
+```
+
+#### 2.3. Performance plots
+
+```{r}
+plot_errors(itb)
+```
+
+From the boxplot we can see that the methods with the lowest error are `na.interp` and `na.interpolation`. These two methods are included in the package _______. We will be able to see this clearly with the line type plot:
+
+```{r}
+plot_errors(dataIn = itb, plotType = "line")
+```
+
+Both interpolation methods are overlapping which means that there is not significant difference between applying any of them. Also we can see that the worst performing imputing methods are the Last Observation Carried Forward (LOCF) and the mean.
+
+This how it looks four of the different imputation simulations at 10% missing data rate.
+
+```{r fig.asp=1}
+plot_impute(steps.clean, 
+            methods = c("na.mean", "na.locf", "na.interp"), 
+            missPercent = 10) 
+```
+
+#### 2.4. Apply selected imputation method to the original dataset
+We bring up the original data frame and get the vectors for the `steps` variable.
+We will use the package `mice` at this stage of the analysis.
+```{r}
+df  <- activity[, c("steps", "interval")]
+# length(steps)
+```
+
+```{r}
+library(mice)
+
+res.mice <- mice(df, method = "pmm")
+```
+
+We show here a dataframe of the replaced or imputed values:
+
+```{r}
+res.mice$imp$steps
+```
+
+Now, to show all the values, o bserved and imputed, we use the mice function complete(). It will show the first of the five dataframes of the multiple imputation. For the second dataframe just add an index at the end:
+
+```{r}
+mice.imp.1 <- mice::complete(res.mice, 1)
+mice.imp.1
+```
+
+```{r}
+stripplot(res.mice, pch = 20, cex = 1.2)
+```
+
+```{r, fig.asp=1}
+
+xyplot(res.mice, steps ~ interval | .imp, pch = 1, cex = 0.5, alpha = 0.5)
+```
+
+### 3. Create a dataset with missing values filled in
 Create a new dataset that is equal to the original dataset but with the missing data filled in.
+
+```{r}
+dim(mice.imp.1)
+summary(mice.imp.1)
+```
+
 
 ### 4. Make a histogram (with missing data filled in)
 Make a histogram of the total number of steps taken each day and Calculate and report the mean and median total number of steps taken per day. Do these values differ from the estimates from the first part of the assignment? What is the impact of imputing missing data on the estimates of the total daily number of steps?

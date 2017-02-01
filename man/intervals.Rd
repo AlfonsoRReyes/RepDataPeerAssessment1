@@ -10,6 +10,7 @@ data(intervals)
 }
 \description{
 Intervals are the columns, dates (rows), steps as values.
+Data frame of 61x289
 }
 \keyword{datasets}
 

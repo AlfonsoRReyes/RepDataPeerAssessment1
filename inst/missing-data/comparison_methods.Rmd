@@ -1,0 +1,135 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+## Datasets
+
+```{r}
+iris
+```
+
+```{r}
+summary(iris)
+dim(iris)
+```
+
+```{r}
+library(RepDataPeerAssessment1)
+library(rprojroot)
+
+project.data <- find_package_root_file('data')
+project.extdata <- find_package_root_file('inst/extdata')
+project.R <- find_package_root_file('R')
+project.data
+project.R
+project.extdata
+```
+
+## Read ecoli dataset
+Source: https://www.r-bloggers.com/classification-trees/
+
+
+```{r}
+ecoli <- read.table(paste(project.extdata, "ecoli.data", sep = "/"))
+ecoli
+```
+
+```{r}
+names(ecoli) <- c("Sequence", "mcv", "gvh", "lip", "chg", "aac", "alm1", "alm2", "class")
+ecoli
+```
+
+```{r}
+save(ecoli, file = paste(project.extdata, "ecoli.rda", sep = "/"))
+```
+
+```{r}
+xtabs(~ class, data = ecoli)
+```
+
+## Step 1: Introduce MCAR NAs in the `iris` dataset
+Missing Completely at Random filling using the uniform distribution.
+
+```{r}
+set.seed(971)
+y <- iris$Sepal.Length
+ni <- 150
+nj <- 1
+prop.m <- 0.05
+mcar <- runif(ni*nj, min = 0, max = 1)
+y.mcar <- ifelse(mcar < prop.m, NA, y)
+y.mcar
+mean(is.na(y.mcar))
+```
+
+```{r}
+iris$Sepal.Length <- y.mcar
+```
+
+```{r}
+mean(is.na(iris$Sepal.Length))
+summary(iris)
+```
+
+```{r}
+# find percentage NAs in all data frame columns
+colMeans(is.na(iris))
+```
+
+```{r}
+library(VIM)
+aggr_plot <- aggr(iris, col=c('navyblue','red'), numbers=TRUE, sortVars=TRUE, labels=names(data), cex.axis=.7, gap=3, ylab=c("Histogram of missing data","Pattern"))
+
+```
+
+```{r}
+library(mice)
+library(VIM)
+
+md.pattern(iris)
+```
+
+```{r}
+md.pairs(iris)
+```
+
+```{r}
+marginplot(iris[c(1,2)])
+```
+
+```{r}
+imp1 <- mice(iris)
+```
+
+```{r}
+imp1
+```
+
+```{r}
+imp1$imp$Sepal.Length
+```
+
+```{r}
+# appending multiple imputations datasets to original dataset
+# .imp variable contains the number of dataset with `0` being the original
+# there will be 150 * (5+1) = 900 rows
+#
+imp_tot2 <- complete(imp1, 'long', inc=TRUE)
+imp_tot2
+```
+
+
+```{r}
+##labels observed data in blue and imputed data in red for y1
+col<-rep(c("blue", "red")[1+as.numeric(is.na(imp1$data$Sepal.Length))],6)
+
+##plots data for y1 by imputation
+stripplot(Sepal.Length~.imp, data=imp_tot2, jit=TRUE,col=col, xlab="imputation Number")
+```
+
+```{r}
+library(ggplot2)
+library(lattice)
+```
+

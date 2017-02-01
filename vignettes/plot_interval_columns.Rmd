@@ -3,6 +3,9 @@ title: "R Notebook"
 output: html_notebook
 ---
 
+This is the logic.
+There are 288 5-min intervals the whle day. We could divide the day in 4: from 00:01 to 06:00, from 06:01 to 12:00, from 12:01 to 18:00, and from 18:01 to 24:00.
+This will help us to define the clusters in the heatmap to draw some distiction.
 
 ```{r}
 library(RepDataPeerAssessment1)
@@ -10,6 +13,75 @@ library(RepDataPeerAssessment1)
 data(intervals)
 intervals
 ```
+
+
+Remove the NAs.
+```{r}
+ok <- complete.cases(intervals)
+ok
+```
+
+
+```{r}
+intervals.na.not <- intervals[ok,]
+intervals.na.not
+```
+
+```{r}
+# summing up the rows looking for any observation that is all zeros. The minimum is 41 steps and maximum for the whole day is 21, 194.
+
+rowSums(intervals.na.not[2:289])
+min(rowSums(intervals.na.not[2:289]))
+max(rowSums(intervals.na.not[2:289]))
+```
+
+
+```{r}
+intervals.m <- data.matrix(intervals.na.not)
+# intervals.m
+str(intervals.m)
+```
+
+```{r}
+head(intervals.m[, 1:2])
+```
+
+```{r}
+cols <- seq(2, 289)
+heatmap(intervals.m[, cols], Colv = NA, Rowv = NA)
+
+```
+
+
+
+
+```{r fig.asp=1}
+heatmap(intervals.m[, 2:65], Colv = NA, Rowv = NA)
+heatmap(intervals.m[, 66:260], Colv = NA, Rowv = NA)
+heatmap(intervals.m[, 261:289], Colv = NA, Rowv = NA)
+```
+
+```{r}
+intervals.na.not
+```
+
+
+```{r}
+cc <- rainbow(74, start = 0, end = .3)
+
+heatmap(intervals.m[, 2:75], Colv = NA, ColSideColors = cc)
+```
+
+
+
+```{r}
+cols <- seq(2, 289)
+image(intervals.m[, cols], 
+      col = grey(seq(0, 1, length = 256)),
+      # col = heat.colors(12)
+      )
+```
+
 
 ```{r}
 matplot(y = actbycol, type = 'l', lty = 1)
@@ -52,3 +124,55 @@ plot.ts(actbycol)
 plot(intervals$date, intervals$`1500`, col = "blue")
 points(intervals$date, intervals$`1510`, col = "green")
 ```
+
+
+
+
+
+
+
+
+```{r}
+require(graphics); require(grDevices)
+x  <- as.matrix(mtcars)
+rc <- rainbow(nrow(x), start = 0, end = .3)
+cc <- rainbow(ncol(x), start = 0, end = .3)
+hv <- heatmap(x, col = cm.colors(256), scale = "column",
+              RowSideColors = rc, ColSideColors = cc, margins = c(5,10),
+              xlab = "specification variables", ylab =  "Car Models",
+              main = "heatmap(<Mtcars data>, ..., scale = \"column\")")
+utils::str(hv) # the two re-ordering index vectors
+
+## no column dendrogram (nor reordering) at all:
+heatmap(x, Colv = NA, col = cm.colors(256), scale = "column",
+        RowSideColors = rc, margins = c(5,10),
+        xlab = "specification variables", ylab =  "Car Models",
+        main = "heatmap(<Mtcars data>, ..., scale = \"column\")")
+
+## "no nothing"
+heatmap(x, Rowv = NA, Colv = NA, scale = "column",
+        main = "heatmap(*, NA, NA) ~= image(t(x))")
+
+
+round(Ca <- cor(attitude), 2)
+symnum(Ca) # simple graphic
+heatmap(Ca,               symm = TRUE, margins = c(6,6)) # with reorder()
+heatmap(Ca, Rowv = FALSE, symm = TRUE, margins = c(6,6)) # _NO_ reorder()
+## slightly artificial with color bar, without and with ordering:
+cc <- rainbow(nrow(Ca))
+heatmap(Ca, Rowv = FALSE, symm = TRUE, RowSideColors = cc, ColSideColors = cc,
+	margins = c(6,6))
+heatmap(Ca,		symm = TRUE, RowSideColors = cc, ColSideColors = cc,
+	margins = c(6,6))
+
+## For variable clustering, rather use distance based on cor():
+symnum( cU <- cor(USJudgeRatings) )
+
+hU <- heatmap(cU, Rowv = FALSE, symm = TRUE, col = topo.colors(16),
+             distfun = function(c) as.dist(1 - c), keep.dendro = TRUE)
+## The Correlation matrix with same reordering:
+round(100 * cU[hU[[1]], hU[[2]]])
+## The column dendrogram:
+utils::str(hU$Colv)
+```
+
