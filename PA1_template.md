@@ -1,6 +1,5 @@
 # Reproducible Research, Assignment 1
 Alfonso R. Reyes  
-`r Sys.Date()`  
 
 
 
@@ -246,7 +245,7 @@ cat("# of NAs:\t\t", dim(activity.NAs)[1], "\n")
 plot(seq(1:nrow(activity.cases)), activity.cases$steps)
 ```
 
-![](ReprodRsAssign_files/figure-html/unnamed-chunk-13-1.png)<!-- -->
+![](PA1_template_files/figure-html/unnamed-chunk-13-1.png)<!-- -->
 
 
 #### Histogram of total number of steps each day
@@ -262,7 +261,7 @@ names(byDate.steps.total) <- c("Day", "total.steps")
 hist(byDate.steps.total$total.steps)
 ```
 
-![](ReprodRsAssign_files/figure-html/unnamed-chunk-14-1.png)<!-- -->
+![](PA1_template_files/figure-html/unnamed-chunk-14-1.png)<!-- -->
 
 
 #### Find the **mean** and the **median** total number of steps per day
@@ -337,7 +336,7 @@ names(byDate.steps.mean) <- c("Day", "mean.steps")
 plot(byDate.steps.mean$Day, byDate.steps.mean$mean.steps, type = "l")
 ```
 
-![](ReprodRsAssign_files/figure-html/unnamed-chunk-18-1.png)<!-- -->
+![](PA1_template_files/figure-html/unnamed-chunk-18-1.png)<!-- -->
 
 ### 2. Which interval contain the maximum # of steps
 Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?
@@ -411,7 +410,7 @@ plot(sorted$interval, sorted$steps.max,
      panel.first = grid(lty = 1))
 ```
 
-![](ReprodRsAssign_files/figure-html/unnamed-chunk-22-1.png)<!-- -->
+![](PA1_template_files/figure-html/unnamed-chunk-22-1.png)<!-- -->
 
 
 ```r
@@ -425,7 +424,7 @@ Warning in xy.coords(x, y, xlabel, ylabel, log): 19 y values <= 0 omitted
 from logarithmic plot
 ```
 
-![](ReprodRsAssign_files/figure-html/unnamed-chunk-23-1.png)<!-- -->
+![](PA1_template_files/figure-html/unnamed-chunk-23-1.png)<!-- -->
 
 And zooming in in a non-logarithmic plot, we can see that the maximum values are those around 800.
 
@@ -436,7 +435,7 @@ plot(sorted$interval, sorted$steps.max,
      panel.first = grid(lty = 1))
 ```
 
-![](ReprodRsAssign_files/figure-html/unnamed-chunk-24-1.png)<!-- -->
+![](PA1_template_files/figure-html/unnamed-chunk-24-1.png)<!-- -->
 
 What we can confirm is that the maximum activity occurs between the **500 and 2000** intervals.
 
@@ -538,21 +537,6 @@ object length
 
 Warning in obs - pred: longer object length is not a multiple of shorter
 object length
-
-Warning in obs - pred: longer object length is not a multiple of shorter
-object length
-
-Warning in obs - pred: longer object length is not a multiple of shorter
-object length
-
-Warning in obs - pred: longer object length is not a multiple of shorter
-object length
-
-Warning in obs - pred: longer object length is not a multiple of shorter
-object length
-
-Warning in obs - pred: longer object length is not a multiple of shorter
-object length
 ```
 
 ```r
@@ -567,24 +551,24 @@ $MissingPercent
  [1]  0  1  2  3  4  5  6  7  8  9 10
 
 $na.approx
- [1]  0.000000  5.473061 20.796070  9.665394 11.289433 18.356101 24.888310
- [8] 25.768170 15.947166 16.905972 18.057085
+ [1]  0.000000  5.454556  8.464277  9.868567 11.428547 12.319045 12.893618
+ [8] 14.459085 28.757653 21.950026 23.074516
 
 $na.interp
- [1]  0.000000  5.473061  8.276041  9.665394 11.289433 12.595005 13.472913
- [8] 14.642949 15.947166 16.905972 18.057085
+ [1]  0.000000  5.454556  8.464277  9.868567 11.428547 12.319045 12.893618
+ [8] 14.459085 15.907699 16.514481 17.861687
 
 $na.interpolation
- [1]  0.000000  5.473061  8.276041  9.665394 11.289433 12.595005 13.472913
- [8] 14.642949 15.947166 16.905972 18.057085
+ [1]  0.000000  5.454556  8.464277  9.868567 11.428547 12.319045 12.893618
+ [8] 14.459085 15.907699 16.514481 17.861687
 
 $na.locf
- [1]  0.000000  7.105623 22.151128 11.992166 15.116003 21.960066 28.113051
- [8] 29.460296 20.736887 21.945770 23.366950
+ [1]  0.000000  7.017167 10.559172 12.729527 15.313857 16.609814 16.649949
+ [8] 19.293431 32.467342 26.404211 28.383793
 
 $na.mean
- [1]  0.00000 11.13982 16.78341 19.54208 23.04584 25.52893 25.90687
- [8] 29.06645 31.65071 33.43195 35.23423
+ [1]  0.00000 10.77232 17.33313 18.81955 23.24894 25.02165 26.14002
+ [8] 28.41363 31.77541 33.91116 35.10665
 ```
 
 #### 2.3. Performance plots
@@ -594,7 +578,7 @@ $na.mean
 plot_errors(itb)
 ```
 
-![](ReprodRsAssign_files/figure-html/unnamed-chunk-28-1.png)<!-- -->
+![](PA1_template_files/figure-html/unnamed-chunk-28-1.png)<!-- -->
 
 From the boxplot we can see that the methods with the lowest error are `na.interp` and `na.interpolation`. These two methods are included in the package _______. We will be able to see this clearly with the line type plot:
 
@@ -603,7 +587,7 @@ From the boxplot we can see that the methods with the lowest error are `na.inter
 plot_errors(dataIn = itb, plotType = "line")
 ```
 
-![](ReprodRsAssign_files/figure-html/unnamed-chunk-29-1.png)<!-- -->
+![](PA1_template_files/figure-html/unnamed-chunk-29-1.png)<!-- -->
 
 Both interpolation methods are overlapping which means that there is not significant difference between applying any of them. Also we can see that the worst performing imputing methods are the Last Observation Carried Forward (LOCF) and the mean.
 
@@ -616,7 +600,7 @@ plot_impute(steps.clean,
             missPercent = 10) 
 ```
 
-![](ReprodRsAssign_files/figure-html/unnamed-chunk-30-1.png)<!-- -->
+![](PA1_template_files/figure-html/unnamed-chunk-30-1.png)<!-- -->
 
 #### 2.4. Apply selected imputation method to the original dataset
 We bring up the original data frame and get the vectors for the `steps` variable.
@@ -728,7 +712,7 @@ summary(byDate.steps.total.1$total.steps)
 hist(byDate.steps.total.1$total.steps)
 ```
 
-![](ReprodRsAssign_files/figure-html/unnamed-chunk-33-1.png)<!-- -->
+![](PA1_template_files/figure-html/unnamed-chunk-33-1.png)<!-- -->
 
 Calculating the mean and the media for the imputed `steps`
 
@@ -1404,7 +1388,7 @@ xyplot(steps.mean ~ interval | as.factor(week),
        layout=c(1,2))
 ```
 
-![](ReprodRsAssign_files/figure-html/unnamed-chunk-38-1.png)<!-- -->
+![](PA1_template_files/figure-html/unnamed-chunk-38-1.png)<!-- -->
 
 
 
