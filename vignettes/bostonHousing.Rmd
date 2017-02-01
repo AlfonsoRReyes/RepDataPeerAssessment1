@@ -9,10 +9,11 @@ output:
 knitr::opts_chunk$set(echo = TRUE, comment = NA, error = TRUE)
 ```
 
-## 3. Imputation with mean / median / mode
+
 Source: https://www.r-bloggers.com/missing-value-treatment/
         http://r-statistics.co/Missing-Value-Treatment-With-R.html
 
+## 3. Imputation with mean / median / mode
 
 Replacing the missing values with the mean / median / mode is a crude way of treating missing values. Depending on the context, like if the variation is low or if the variable has low leverage over the response, such a rough approximation is acceptable and could possibly give satisfactory results.
 
@@ -30,6 +31,8 @@ original.NA <- BostonHousing
 ```
 
 The missing values have been injected. Though we know where the missings are, lets quickly check the ‘missings’ pattern using mice::md.pattern.
+
+### missing values pattern
 
 ```{r}
 # Pattern of missing values
