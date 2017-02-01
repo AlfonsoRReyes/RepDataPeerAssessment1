@@ -1,0 +1,60 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+library(RepDataPeerAssessment1)
+library(rprojroot)
+
+project.data <- find_package_root_file('data')
+project.extdata <- find_package_root_file('inst/extdata')
+project.R <- find_package_root_file('R')
+project.data
+project.R
+project.extdata
+```
+
+
+```{r}
+download.file("http://www.statsci.org/data/general/titanic.txt", paste(project.extdata, "titanic.txt", sep = "/"))
+```
+
+```{r}
+titanic <- read.table(paste(project.extdata, "titanic.txt", sep = "/"), sep = "\t", header = TRUE)
+summary(titanic)
+```
+
+```{r}
+titanic0 <- titanic
+save(titanic0, file = paste(project.extdata, "titanic.rda", sep = "/"))
+set.seed(4321)
+```
+
+```{r}
+titanic$Sex[sample(nrow(titanic), 10)] <- NA
+titanic$PClass[sample(nrow(titanic), 10)] <- NA
+titanic$Survived[sample(nrow(titanic), 10)] <- NA
+```
+
+
+```{r}
+# percentage of missing data
+colMeans(is.na(titanic))
+```
+
+```{r}
+fullglm <- glm(Survived ~ PClass + Sex + Age,
+    family = binomial, data = titanic0)
+summary(fullglm)
+```
+
+After Imposing some more Missings, the ListWise Deletion Results
+```{r}
+fullglm <- glm(Survived ~ PClass + Sex + Age,
+    family = binomial, data = titanic)
+summary(fullglm)
+```
+
+
+

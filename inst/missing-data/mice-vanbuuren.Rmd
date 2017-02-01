@@ -7,6 +7,7 @@ Source: http://www.stefvanbuuren.nl/publications/MICE%20in%20R%20-%20Draft.pdf
 
 ```{r}
 library("VIM")
+library(lattice)
 
 marginplot(nhanes[, c("chl", "bmi")], col = mdc(1:2), cex = 1.2, cex.lab = 1.2, cex.numbers = 1.3, pch = 19)
 
