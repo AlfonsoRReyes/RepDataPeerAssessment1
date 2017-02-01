@@ -23,13 +23,58 @@ summary(steps)
 We have `r sum(is.na(steps))` NA values.
 
 
-```{r}
-steps.imp <- na.interp(steps)
-summary(steps.imp)
-```
+## Imputation with `na.interp`
 
 We have now `r sum(is.na(steps.imp))` NA values.
 
+```{r}
+summary(activity$steps)
+se.0 <- sd(activity$steps, 
+           na.rm = TRUE) / sqrt(sum(!is.na(activity$steps)))
+cat("SE(before imp.) = ", se.0, "\n")
+
+steps.imp.interp <- na.interp(steps)     # interpolating the NA values
+
+summary(steps.imp.interp)
+se.1 <- sd(steps.imp.interp, 
+           na.rm = TRUE) / sqrt(sum(!is.na(steps.imp.interp)))
+cat("SE(after imp.) = ", se.1, "\n")
+```
+
+## Imputation with the mean
+
+```{r}
+cat("Before imputation\n")
+steps.imp.mean <- activity$steps
+indNA <- which(is.na(steps.imp.mean))   # rows that are NA
+cat(sprintf("# rows with NA: %d \n", length(indNA)))
+
+# create vector with the mean imputation
+predicteds <- rep(mean(steps.imp.mean, na.rm = TRUE), length(indNA))
+summary(predicteds)
+
+cat("\nAfter imputation: mean\n")
+steps.imp.mean[indNA] <- predicteds     # replace NAs with the mean vector
+indNA <- which(is.na(steps.imp.mean))   # rows that are NA
+cat(sprintf("# rows with NA: %d \n", length(indNA)))
+summary(steps.imp.mean)
+
+se.2 <- sd(steps.imp.mean, 
+           na.rm = TRUE) / sqrt(sum(!is.na(steps.imp.mean)))
+
+cat("\nSE(steps.imp.mean) = ", se.2, "\n")
+```
+
+
+```{r}
+library(DMwR)
+
+indNA <- which(is.na(activity$steps))
+before <- activity$steps[complete.cases(activity$steps)]
+summary(steps.imp.interp)
+summary(steps.imp.mean)
+regr.eval(steps.imp.mean, steps.imp.interp)      # compare original vs modified variable
+```
 
 ## using interpolation
 
