@@ -71,7 +71,6 @@ str(activity)
 ```
 
 
-
 ```{r}
 # save the dataset
 save(activity, file=paste(project.data, "activity.RData", sep = "/"))
@@ -141,7 +140,7 @@ activity.NAs <- activity[!complete, ]       # NAs
 activity.NAs.not <- activity.cases
 
 cat("# of observations:\t", dim(activity.cases)[1], "\n")
-cat("# of NAs:\t\t\t", dim(activity.NAs)[1], "\n")
+cat("# of NAs:\t\t", dim(activity.NAs)[1], "\n")
 ```
 
 ```{r fig.asp=1}
@@ -152,18 +151,32 @@ plot(seq(1:nrow(activity.cases)), activity.cases$steps)
 #### Histogram of total number of steps each day
 
 ```{r}
-hist(activity.cases$steps, breaks = 30)
+byDate.steps.total <- aggregate(activity.cases$steps, 
+                               by = list(activity.cases$date), sum)
+
+# rename the variable to something meaningful
+names(byDate.steps.total) <- c("Day", "total.steps")
+```
+
+```{r}
+hist(byDate.steps.total$total.steps)
+```
+
+
+```{r}
+# hist(activity.cases$steps, breaks = 30)
+# mean(activity.cases$steps)
 ```
 
 
 #### Find the **mean** and the **median** total number of steps per day
 
 ```{r}
-mean(activity.cases$steps)
+mean(byDate.steps.total$total.steps)
 ```
 
 ```{r}
-median(activity.cases$steps)
+median(byDate.steps.total$total.steps)
 ```
 
 #### How many unique intervals are there?
@@ -323,6 +336,28 @@ plot_impute(steps.clean,
 #### 2.4. Apply selected imputation method to the original dataset
 We bring up the original data frame and get the vectors for the `steps` variable.
 
+The function used is na.interp from the package 'forecast'. 
+Imputation with `na.interp`
+
+We have now `r sum(is.na(steps.imp))` NA values.
+
+```{r}
+library(forecast)
+
+steps <- activity$steps
+
+summary(activity$steps)
+se.0 <- sd(activity$steps, 
+           na.rm = TRUE) / sqrt(sum(!is.na(activity$steps)))
+cat("SE(before imp.) = ", se.0, "\n")
+
+steps.imp.interp <- na.interp(steps)     # interpolating the NA values
+
+summary(steps.imp.interp)
+se.1 <- sd(steps.imp.interp, 
+           na.rm = TRUE) / sqrt(sum(!is.na(steps.imp.interp)))
+cat("SE(after imp.) = ", se.1, "\n")
+```
 
 
 ### 4. Make a histogram (with missing data filled in)
