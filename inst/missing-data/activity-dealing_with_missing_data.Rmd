@@ -1,9 +1,15 @@
 ---
 title: "dealing with missing data"
-output: html_notebook
+output:
+  html_document: default
+  html_notebook: default
 ---
 
-## Using own package
+```{r setup, include=FALSE, error=TRUE, message=FALSE}
+knitr::opts_chunk$set(echo = TRUE, comment = NA, error = TRUE)
+```
+
+## Using on `activity` dataset
 
 ```{r}
 library(RepDataPeerAssessment1)
@@ -18,23 +24,16 @@ steps <- activity$steps
 summary(steps)
 ```
 
-We have 2304 NA's.
+We have `r sum(is.na(steps))` NAs in this variable.
 
-How important is it?
-```{r}
-mean(is.na(steps))
-```
+### How important is it?
 
-We have 13% of missing values.
-
-```{r}
-missing.days <- 
-```
+We have `r round(mean(is.na(steps)) * 100, 0)` percent of missing values!
 
 
-## Using `dplyr`
 
-How many values are zeros?
+## How many values are zeros?
+
 ```{r message=FALSE}
 library(dplyr)
 
@@ -52,8 +51,8 @@ length(steps[is.na(steps) == TRUE])     # number of NAs
 
 Analyze for NAs in a the whole dataframe:
 ```{r}
-head(is.na(activity))
 length(steps[is.na(steps) == FALSE])     # number of non-NAs
+summary(activity)
 ```
 
 ### Visualizing missing data in a plot
@@ -76,11 +75,6 @@ box(lty = '1373', col = 'black')    # draw a box around
 ```
 
 
-
-
-
-
-
 ## Using the mean to replace NA values
 Source: https://www.r-bloggers.com/example-2014-5-simple-mean-imputation/
 
@@ -92,13 +86,11 @@ tail(df)
 
 ```{r}
 df$y[is.na(df$y)] = mean(df$y, na.rm = TRUE)
-```
-
-```{r}
 tail(df)
 ```
 
-### Alternative
+
+### Alternative using `transform` and `ifelse`
 ```{r}
 # alternative
 df = data.frame(x = 1:20, y = c(1:10,rep(NA,10)))

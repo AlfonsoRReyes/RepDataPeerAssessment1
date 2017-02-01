@@ -1,0 +1,22 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+
+```{r fig.asp=1}
+data(Oats, package = "MEMSS")
+xyplot(yield ~ nitro | Variety + Block, data = Oats, type = "o")
+```
+
+
+```{r fig.asp=1}
+data(Oats, package = "MEMSS")
+xyplot(yield ~ nitro | Block, data = Oats, type = "o")
+```
+
+```{r fig.asp=1}
+data(Oats, package = "MEMSS")
+# xyplot(y ~ x | panel, data = dataset, type = "o")
+xyplot(yield ~ nitro | Variety, data = Oats, type = "o")
+```

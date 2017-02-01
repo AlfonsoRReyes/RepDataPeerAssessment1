@@ -5,6 +5,8 @@ output: html_notebook
 
 Source: https://github.com/neerajdhanraj/imputeTestbench/blob/master/Manuscript%20imputeTestbench.pdf
 
+
+
 The default dataset if dataIn = NULL is nottem, a time series object of average
 air temperatures recorded at Nottingham Castle from 1920 to 1930. This dataset is included with the base datasets package.
 
@@ -163,3 +165,26 @@ plot_errors(dataIn = err_mape, plotType = "line")
 ```{r}
 attr(itb, 'errall')
 ```
+
+## Adding an imputation function
+As described above, imputation methods supplied by the user can be added to
+impute_errors(). The example below demonstrates the addition of a random number
+imputation method to the error proﬁle. An R script ﬁle must be created for
+adding and saving the function. Additional functions can be added to the script
+as needed. User-supplied functions for imputation should use time series data 
+with missing values as input and return the time series data with the imputed
+values as shown below.
+
+The path where the R script is saved is used as an input string to the
+methodPath argument. The name of the new function is added to the methods
+argument, including any of the default methods used by impute_errors. Results
+are shown below.
+
+```{r}
+ex <- impute_errors(dataIn = aus, methodPath = '../../R/imputation.R',
+methods = c('na.mean', 'na.locf', 'na.approx', 'sss'))
+
+ex
+```
+
+

@@ -1,0 +1,126 @@
+---
+title: "Imputation with mice-pmm"
+output: html_notebook
+---
+
+We will use the package `mice` at this stage of the analysis.
+The dataframe or matrix have to be at least 2 variables.
+```{r}
+library(RepDataPeerAssessment1)
+library(lattice)
+library(mice)
+
+df  <- activity[, c("steps", "interval")]
+# length(steps)
+```
+
+```{r}
+res.mice <- mice(df, method = "pmm")
+```
+
+We show here a dataframe with all replaced or imputed values data frames. They are five by default.
+
+```{r}
+res.mice$imp$steps
+```
+
+Now, to show all the values, observed and imputed, we use the mice function complete(). It will show the first of the five dataframes of the multiple imputation. For the second dataframe just add an index at the end:
+
+```{r}
+mice.imp.1 <- mice::complete(res.mice, 1)
+head(mice.imp.1)
+summary(mice.imp.1$steps)
+```
+
+This is for the 2nd imputation data frame.
+```{r}
+mice.imp.2 <- mice::complete(res.mice, 2)
+head(mice.imp.2)
+summary(mice.imp.2$steps)
+```
+
+Plots for the five imputations. The first is the original data frame, with no imputations at all.
+
+```{r}
+stripplot(res.mice, pch = 20, cex = 1.2)
+```
+
+```{r, fig.asp=1}
+
+xyplot(res.mice, steps ~ interval | .imp, pch = 1, cex = 0.5, alpha = 0.5)
+```
+
+### 3. Create a dataset with missing values filled in
+Create a new dataset that is equal to the original dataset but with the missing data filled in.
+
+```{r}
+dim(mice.imp.1)
+summary(mice.imp.1)
+```
+
+## Building a custom function for ImputeTestbench
+
+```{r}
+# A sample function to randomly impute the missing data
+library(imputeTS)
+
+sss <- function(In){
+  out <- na.random(In)
+  out <- as.numeric(out)
+  return(out)
+}
+
+```
+
+
+```{r}
+
+pmm <- function(In) {
+  library(mice)
+  library(RepDataPeerAssessment1)
+  
+  df  <- activity[, c("steps", "interval")]
+  res.mice <- mice(df, method = "pmm")
+  mice.imp.1 <- mice::complete(res.mice, 1)
+  out <- mice.imp.1$steps
+  out <- as.numeric(out)
+  return(out)
+}
+
+```
+
+
+```{r}
+pmm(activity$steps)
+```
+
+
+```{r}
+ex <- impute_errors(dataIn = aus, methodPath = '../../R/imputation.R',
+methods = c('na.mean', 'na.locf', 'na.approx', 'sss'))
+
+ex
+```
+
+
+```{r}
+source("../../R/imputation.R")
+run.mice.pmm()
+```
+
+
+```{r}
+library(imputeTestbench)
+
+imp <- impute_errors(dataIn = activity$steps, 
+                     methodPath = '../../R/imputation.R',
+                     methods = c('na.mean', 'pmm'))
+
+imp
+
+```
+
+```{r}
+plot_errors(imp)
+```
+
