@@ -156,9 +156,7 @@ byDate.steps.total <- aggregate(activity.cases$steps,
 
 # rename the variable to something meaningful
 names(byDate.steps.total) <- c("Day", "total.steps")
-```
-
-```{r}
+# byDate.steps.total
 hist(byDate.steps.total$total.steps)
 ```
 
@@ -166,11 +164,13 @@ hist(byDate.steps.total$total.steps)
 #### Find the **mean** and the **median** total number of steps per day
 
 ```{r}
-mean(byDate.steps.total$total.steps)
+mean.0 <- mean(byDate.steps.total$total.steps)
+mean.0
 ```
 
 ```{r}
-median(byDate.steps.total$total.steps)
+median.0 <- median(byDate.steps.total$total.steps)
+median.0
 ```
 
 #### How many unique intervals are there?
@@ -343,7 +343,7 @@ steps <- activity$steps
 summary(activity$steps)
 se.0 <- sd(activity$steps, 
            na.rm = TRUE) / sqrt(sum(!is.na(activity$steps)))
-cat("SE(before imp.) = ", se.0, "\n")
+cat("SE(before imp.) = ", se.0, "\n\n")
 
 steps.imp.interp <- na.interp(steps)     # interpolating the NA values
 
@@ -357,14 +357,70 @@ cat("SE(after imp.) = ", se.1, "\n")
 ### 4. Make a histogram (with missing data filled in)
 Make a histogram of the total number of steps taken each day and Calculate and report the mean and median total number of steps taken per day. Do these values differ from the estimates from the first part of the assignment? What is the impact of imputing missing data on the estimates of the total daily number of steps?
 
+First, we put together the activity data frame with the imputed values.
+
+```{r}
+activity.imp <- activity
+
+activity.imp$steps <- as.numeric(steps.imp.interp)
+
+summary(activity.imp)
+str(activity.imp)
+```
 
 
+```{r}
+byDate.steps.total.1 <- aggregate(activity.imp$steps, 
+                               by = list(activity.imp$date), sum)
 
+# rename the variable to something meaningful
+names(byDate.steps.total.1) <- c("Day", "total.steps")
+summary(byDate.steps.total.1$total.steps)
+hist(byDate.steps.total.1$total.steps)
+```
+
+Calculating the mean and the media for the imputed `steps`
+```{r}
+mean.1 <- mean(byDate.steps.total.1$total.steps)
+median.1 <- median(byDate.steps.total.1$total.steps)
+mean.1
+median.1
+```
+
+And we find that there is a difference between mean and the media with the dataset with missing data and the dataset with imputed values.
+
+```{r}
+mean.0 - mean.1
+median.0 - median.1
+```
 
 ## E. Are there differences in activity patterns between weekdays and weekends?
 
 ### 1. Create a new factor variable
 Create a new factor variable in the dataset with two levels – “weekday” and “weekend” indicating whether a given date is a weekday or weekend day.
+
+
+```{r}
+activity.imp$weekdays <- weekdays(activity.imp$date)
+unique(activity.imp)
+```
+
+
+
+```{r}
+unique(weekdays(activity.imp$date))
+```
+
+```{r}
+res <- ifelse(weekdays(activity.imp$date) %in% c("Saturday", "Sunday"), "weekend", "weekday")
+
+unique(res)
+```
+
+```{r}
+activity.imp$week <- ifelse(weekdays(activity.imp$date) %in% c("Saturday", "Sunday"), "weekend", "weekday")
+```
+
 
 
 ### 2. Make a panel
