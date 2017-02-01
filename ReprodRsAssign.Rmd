@@ -3,7 +3,8 @@ title: "Reproducible Research, Assignment 1"
 author: "Alfonso R. Reyes"
 date: '`r Sys.Date()`'
 output:
-  html_document: default
+  html_document: 
+    keep_md: yes
   html_notebook: default
 ---
 
@@ -24,6 +25,7 @@ We start by downloading the raw data using the link provided by the instructor. 
 library(RepDataPeerAssessment1)
 library(rprojroot)
 
+cat("Setting up the project folders:\n")
 project.data <- find_package_root_file('data')
 project.extdata <- find_package_root_file('inst/extdata')
 project.R <- find_package_root_file('R')
@@ -35,6 +37,7 @@ project.extdata
 
 ```{r}
 downloadZip <- function(fileUrl, outDir="./data") {
+  # function to download zipped file and unpack
   temp <- tempfile()
   download.file(fileUrl, temp, mode = "wb")
   unzip(temp, exdir = outDir)
@@ -44,6 +47,7 @@ downloadZip <- function(fileUrl, outDir="./data") {
 
 ```{r}
 fileUrl <- "https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2Factivity.zip"
+cat("Unpacking the raw data file:\n")
 outDir <- project.extdata             # folder for raw data
 downloadZip(fileUrl, outDir = outDir)   # download and unpack zip file
 ```
@@ -53,7 +57,7 @@ downloadZip(fileUrl, outDir = outDir)   # download and unpack zip file
 More RData files may be generated during this assignment. They will be placed under the folder `data`.
 
 
-#### Saving the raw dataset to `data` folder
+#### Saving the raw dataset to the `data` folder
 Reads the CSV raw data file from `inst/extdata` and save it under `data`. Then remove it from memory.
 ```{r}
 # save the dataset
@@ -63,7 +67,7 @@ head(activity.raw)
 ```
 
 
-**Convert the variable `date` as.factor to `as.date`**
+**Convert the variable `date` from `as.factor` to `as.date`**
 ```{r}
 activity <- activity.raw
 activity$date <- as.Date(activity.raw$date)
@@ -82,6 +86,8 @@ Confirm it has been saved:
 ```{r results='hold'}
 rm(activity)                                            # remove variable from memory
 load(paste(project.data, "activity.RData", sep = "/"))  # load data file
+cat("Checking dataset has the structure we want\n\n")
+str(activity)
 head(activity)
 # file.exists(paste(project.data, "activity.RData", sep = "/"))  # we could use this too
 ```
@@ -116,16 +122,13 @@ dim(activity)
 names(activity)
 ```
 
-**<u>Structure</u>**
-```{r}
-str(activity)
-```
-
 **<u>Summary</u>**
 ```{r}
-summary(activity)
+suma <- summary(activity)
+suma
 ```
 
+Notice that we have `r suma[7, 1]`.
 
 ## B. What is the mean total number of steps taken per day?
 We will ignore the NAs in this part of the assignment. 
@@ -215,17 +218,21 @@ whole_row <- activity.cases[index, ]
 whole_row
 ```
 
+The interval with the maximum number of steps is `r whole_row$interval`.
 
 **<u>Grouping by interval</u>**
-```{r}
+```{r results='hold'}
 byInterval <- aggregate(activity.cases$steps, 
                         by = list(activity.cases$interval), 
                         max)
 
 names(byInterval) <- c("interval", "steps.max")
 sorted <- byInterval[order(-byInterval$steps.max), ]   # order by steps, descending
-head(sorted)
+cat("These are the top 10 intervals with more activity\n\n")
+head(sorted, 10)
 ```
+
+\    
 
 #### Find what are the intervals with more activity
 We will plot the number maximum of steps in logarithmic scale:
@@ -295,7 +302,7 @@ length(steps.clean)
 
 #### 2.2. Apply several imputation methods
 
-```{r}
+```{r message=FALSE}
 library(imputeTestbench)
 
 itb <- impute_errors(steps.clean, 
@@ -330,12 +337,10 @@ plot_impute(steps.clean,
 #### 2.4. Apply selected imputation method to the original dataset
 We bring up the original data frame and get the vectors for the `steps` variable.
 
-The function used is na.interp from the package 'forecast'. 
-Imputation with `na.interp`
+The function used is na.interp from the package 'forecast'. So, the imputation will be performed with `na.interp`.
 
-We have now `r sum(is.na(steps.imp))` NA values.
 
-```{r}
+```{r message=FALSE}
 library(forecast)
 
 steps <- activity$steps
@@ -353,6 +358,9 @@ se.1 <- sd(steps.imp.interp,
 cat("SE(after imp.) = ", se.1, "\n")
 ```
 
+What we can see is that there is an improvement in the Standard Error (SE) from 0.91 to 0.79.
+
+\     
 
 ### 4. Make a histogram (with missing data filled in)
 Make a histogram of the total number of steps taken each day and Calculate and report the mean and median total number of steps taken per day. Do these values differ from the estimates from the first part of the assignment? What is the impact of imputing missing data on the estimates of the total daily number of steps?
@@ -394,6 +402,11 @@ mean.0 - mean.1
 median.0 - median.1
 ```
 
+The change in the mean is `r round((mean.0 - mean.1)/mean.0*100, 0)` percent and of the median is `r round((median.0 - median.1)/median.0*100, 0)` percent.
+
+\   
+
+
 ## E. Are there differences in activity patterns between weekdays and weekends?
 
 ### 1. Create a new factor variable
@@ -425,6 +438,7 @@ byInterval
 
 
 ```{r fig.asp=1}
+library(lattice)
 # xyplot(y ~ x | panel, data = dataset, type = "o")
 xyplot(steps.mean ~ interval | as.factor(week), 
        data = byInterval, 
