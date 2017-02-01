@@ -3,3 +3,75 @@ title: "Interpolation imputation"
 output: html_notebook
 ---
 
+```{r results='hold'}
+library(RepDataPeerAssessment1)
+library(rprojroot)
+
+project.data <- find_package_root_file('data')
+project.extdata <- find_package_root_file('inst/extdata')
+project.R <- find_package_root_file('R')
+project.data
+project.R
+project.extdata
+```
+
+```{r}
+data("activity")
+steps <- activity$steps
+summary(steps)
+```
+We have `r sum(is.na(steps))` NA values.
+
+
+```{r}
+steps.imp <- na.interp(steps)
+summary(steps.imp)
+```
+
+We have now `r sum(is.na(steps.imp))` NA values.
+
+
+## using interpolation
+
+
+```{r chunk2}
+library(forecast)
+library(zoo)
+
+start <- as.POSIXct("2010-01-01") 
+freq <- as.difftime(6, units = "hours") 
+dayvals <- (1:4)*10 
+timevals <- c(3, 1, 2, 4) 
+index <- seq(from = start, by = freq, length.out = 16)
+obs <- (rep(dayvals, each = 4) + rep(timevals, times = 4))
+myzoo <- zoo(obs, index)
+myzoo[10] <- NA
+cat(myzoo[10])
+```
+
+```{r}
+myzoo.fixed <- na.locf(myzoo)
+myzoo.fixed[10]
+```
+
+
+
+```{r}
+fit <- na.interp(myzoo)
+fit[10]  # 32.5, vs. 31.0 actual and 32.0 from Rob Hyndman's answer
+myzoo[10] <- fit[10]
+```
+
+```{r anychunk, ref.label='addData', echo=FALSE}
+x <- ts(myzoo,f=4)
+fit <- ts(rowSums(tsSmooth(StructTS(x))[,-2]))
+tsp(fit) <- tsp(x)
+plot(x)
+lines(fit,col=2)
+```
+
+
+```{r anotherChunk, ref.label="chunk2"}
+cat(myzoo[10])
+```
+
