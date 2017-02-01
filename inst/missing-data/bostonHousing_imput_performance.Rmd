@@ -133,6 +133,7 @@ actuals <- original$ptratio[is.na(BostonHousing$ptratio)]
 predicteds <- rep(mean(BostonHousing$ptratio, na.rm = TRUE), length(actuals))
 # data.frame(actuals, predicteds)
 length(actuals); length(predicteds) # length of vectors to compare
+
 regr.eval(actuals, predicteds)      # compare original vs modified variable
 
 #>        mae        mse       rmse       mape 
