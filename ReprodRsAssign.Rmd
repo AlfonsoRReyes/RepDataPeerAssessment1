@@ -3,7 +3,8 @@ title: "Reproducible Research, Assignment 1"
 author: "Alfonso R. Reyes"
 date: '`r Sys.Date()`'
 output:
-  html_document: default
+  html_document: 
+    keep_md: yes
   html_notebook: default
 ---
 
