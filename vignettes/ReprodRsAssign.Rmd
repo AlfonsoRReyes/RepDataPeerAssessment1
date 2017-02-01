@@ -163,12 +163,6 @@ hist(byDate.steps.total$total.steps)
 ```
 
 
-```{r}
-# hist(activity.cases$steps, breaks = 30)
-# mean(activity.cases$steps)
-```
-
-
 #### Find the **mean** and the **median** total number of steps per day
 
 ```{r}
