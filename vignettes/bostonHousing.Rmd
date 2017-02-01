@@ -1,8 +1,8 @@
 ---
 title: "Missing Value Treatment"
 output:
-  html_document: default
   html_notebook: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE, error=TRUE, message=FALSE}
@@ -66,7 +66,7 @@ If a particular variable is having more missing values that rest of the variable
 Replacing the missing values with the mean / median / mode is a **crude way** of treating missing values. Depending on the context, like if the variation is low or if the variable has low leverage over the response, such a rough approximation is acceptable and could possibly give satisfactory results.
 
 
-### 3.1 impute with the mean
+### 3.1 impute with the mean, Hmisc
 ```{r message=FALSE}
 library(Hmisc)
 impute(BostonHousing$ptratio, mean)  # replace with mean
@@ -86,9 +86,19 @@ impute(BostonHousing$ptratio, 20)  # replace specific number
 
 ### 3.4 impute manually
 ```{r}
-# or if you want to impute manually
-BostonHousing$ptratio[is.na(BostonHousing$ptratio)] <- mean(BostonHousing$ptratio, na.rm = T)  # not run
+summary(BostonHousing$ptratio)
 ```
+
+```{r}
+# or if you want to impute manually
+BostonHousing$ptratio[is.na(BostonHousing$ptratio)] <- mean(BostonHousing$ptratio, 
+                                                            na.rm = T)  # not run
+```
+
+```{r}
+summary(BostonHousing$ptratio)
+```
+
 
 ### 3.5 Accuracy with the mean
 Lets compute the accuracy when it is imputed with mean.
@@ -96,7 +106,9 @@ Lets compute the accuracy when it is imputed with mean.
 > We use the function `regr.eval` from the **DMwR** package. This function compares the original vector with the modified one.
 
 mape: mean absolute percentage error
+
 "mae": mean absolute error, which is calculated as sum(|t_i - p_i|)/N, where t's are the true values and p's are the predictions, while N is supposed to be the size of both vectors.
+
 "mse": mean squared error, which is calculated as sum( (t_i - p_i)^2 )/N
 
 $$mae = \left ( \sum \left| (t_i - p_i) \right| \right) \frac {1}{N}$$
@@ -106,37 +118,48 @@ $$rmse = \sqrt {mse}$$
 
 $$mape = \left ( \sum \frac{{t_i - p_i}} {t_i}  \right )  \frac {1}{N}$$
 
+Here we will compare the 40 NA values replaced with the mean versus the original variable that had no NAs. It is only a 40values comparison of the variable `ptratio`.
 
 ```{r results='hold', message=FALSE}
 library(DMwR)
 
 BostonHousing <- original.NA
+summary(BostonHousing[c("rad", "ptratio")])     # summary before
 
-actuals <- original$ptratio[is.na(BostonHousing$ptratio)]  # take the original values
+# get the 40 original non-NA values
+actuals <- original$ptratio[is.na(BostonHousing$ptratio)]  
+
+# replace all the 40 NA values with the mean
 predicteds <- rep(mean(BostonHousing$ptratio, na.rm = TRUE), length(actuals))
-regr.eval(actuals, predicteds)
+# data.frame(actuals, predicteds)
+length(actuals); length(predicteds) # length of vectors to compare
+regr.eval(actuals, predicteds)      # compare original vs modified variable
 
 #>        mae        mse       rmse       mape 
 #> 1.62324034 4.19306071 2.04769644 0.095456
 ```
 
-**What is the Standard Error?**
+**What is the Standard Error before an after imputation?**
 This is calculated over the vector `ptratio` without any NAs.
 ```{r}
 BostonHousing <- original.NA
-se.0 <- sd(BostonHousing$ptratio, na.rm = TRUE) / sqrt(sum(!is.na(BostonHousing$ptratio)))
-se.0
-```
 
-```{r}
-indNA <- which(is.na(BostonHousing$ptratio))
-BostonHousing$ptratio[indNA] <- predicteds
-se.1 <- sd(BostonHousing$ptratio) / sqrt(sum(!is.na(BostonHousing$ptratio)))
-se.1
-```
+# And here, we are replacing the 40 NAs in the whole `ptratio` vector.
+cat("Before: ", sum(is.na(BostonHousing$ptratio)), " NAs\n")
+summary(BostonHousing$ptratio)
+se.0 <- sd(BostonHousing$ptratio, 
+           na.rm = TRUE) / sqrt(sum(!is.na(BostonHousing$ptratio)))
+cat("SE(before) = ", se.0, "\n")
+indNA <- which(is.na(BostonHousing$ptratio))   # rows that are NA
+BostonHousing$ptratio[indNA] <- predicteds     # replace NAs with the mean vector
 
-```{r}
-(se.0 - se.1) / se.0 * 100
+cat("\nAfter: ", sum(is.na(BostonHousing$ptratio)), " NAs\n")
+summary(BostonHousing$ptratio)
+se.1 <- sd(BostonHousing$ptratio, 
+           na.rm = TRUE) / sqrt(sum(!is.na(BostonHousing$ptratio)))
+cat("SE(after) = ", se.1, "\n")
+
+cat("\nImprovement = ", (se.0 - se.1) / se.0 * 100, " %")
 ```
 
 
@@ -170,8 +193,7 @@ regr.eval(actuals, predicteds)
 #> 1.00188715 1.97910183 1.40680554 0.05859526 
 ```
 
-The mean absolute percentage error (mape) has improved by ~ 39% compared to the imputation by mean.   
-Good.
+The mean absolute percentage error (mape) has improved by ~ 39% compared to the imputation by the mean. Good!
 
 ```{r}
 indNA <- which(is.na(BostonHousing$ptratio))
@@ -180,10 +202,8 @@ se.2 <- sd(BostonHousing$ptratio) / sqrt(sum(!is.na(BostonHousing$ptratio)))
 se.2
 ```
 
-```{r}
-(se.0 - se.2) / se.0 * 100
-```
 
+The improvement is `r (se.0 - se.2) / se.0 * 100` percent
 
 ### 4.2 rpart
 The limitation with DMwR::knnImputation is that it sometimes may not be appropriate to use when the missing value comes from a factor variable. Both rpart and mice has flexibility to handle that scenario. The advantage with rpart is that you just need only one of the variables to be non NA in the predictor fields.
@@ -225,12 +245,11 @@ indNA <- which(is.na(BostonHousing$ptratio))
 BostonHousing$ptratio[indNA] <- predicteds
 se.3 <- sd(BostonHousing$ptratio) / sqrt(sum(!is.na(BostonHousing$ptratio)))
 se.3
-(se.0 - se.3) / se.0 * 100
+
 ```
+The improvement is `r (se.0 - se.3) / se.0 * 100` percent.
 
-
-
-Accuracy for rad
+### Accuracy for the `rad` variable
 
 ```{r}
 actuals <- original$rad[is.na(BostonHousing$rad)]
