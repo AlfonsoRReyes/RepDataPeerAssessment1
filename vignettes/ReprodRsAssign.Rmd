@@ -401,30 +401,36 @@ Create a new factor variable in the dataset with two levels – “weekday” an
 
 
 ```{r}
-activity.imp$weekdays <- weekdays(activity.imp$date)
-unique(activity.imp)
-```
-
-
-
-```{r}
-unique(weekdays(activity.imp$date))
-```
-
-```{r}
-res <- ifelse(weekdays(activity.imp$date) %in% c("Saturday", "Sunday"), "weekend", "weekday")
-
-unique(res)
-```
-
-```{r}
 activity.imp$week <- ifelse(weekdays(activity.imp$date) %in% c("Saturday", "Sunday"), "weekend", "weekday")
-```
 
+# View(activity.imp)
+
+activity.imp$week <- as.factor(activity.imp$week)
+str(activity.imp)
+```
 
 
 ### 2. Make a panel
 Make a panel plot containing a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all weekday days or weekend days (y-axis). See the README file in the GitHub repository to see an example of what this plot should look like using simulated data.
+
+```{r}
+activity.imp.1 <- activity.imp
+
+byInterval <- aggregate(activity.imp.1$steps, 
+                        by = list(activity.imp.1$interval, activity.imp.1$week), mean)
+
+names(byInterval) <- c("interval", "week", "steps.mean")
+byInterval
+```
+
+
+```{r fig.asp=1}
+# xyplot(y ~ x | panel, data = dataset, type = "o")
+xyplot(steps.mean ~ interval | as.factor(week), 
+       data = byInterval, 
+       type = "l", 
+       layout=c(1,2))
+```
 
 
 
