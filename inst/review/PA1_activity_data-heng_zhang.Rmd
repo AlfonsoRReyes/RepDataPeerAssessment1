@@ -28,22 +28,31 @@ library(ggplot2)
 And this is the colour code for histogram filling and line plotting. You could change it to any colour you'd like. 
 ```{r}
 colorcode <- "#36B8B8"
+filename <- "../../inst/extdata/activity.csv"
 ```
 
 ## Loading and preprocessing the data
 
 Give the csv file a name, download the zip file, unzip it, read the csv file in, and get basic summary info.
 ```{r}
-filename <- "activity.csv"
+
 
 fileurl <- "https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2Factivity.zip"  
 download.file(fileurl, destfile = 'data_activity.zip')  
 unzip('data_activity.zip', filename)  
 
+
+```
+
+```{r}
 data <- read.csv(filename)
 str(data)
 summary(data)
 ```
+
+  
+  
+  
   
 ## What is mean total number of steps taken per day?
 1. calculate the total number of steps taken per day  
@@ -59,7 +68,10 @@ head(numStepsDaily)
 Cast the format of dates by using **as.Date**. **binwidth** is arbitrarily chosen, so you could change it for your own aesthetic view. 
 ```{r}
 data$date <- as.Date(data$date)
-ggplot(numStepsDaily, aes(x = steps)) + geom_histogram(fill = colorcode, binwidth = 1000) + labs(title = 'Histogram of the total number of steps',
+
+ggplot(numStepsDaily, aes(x = steps)) + 
+  geom_histogram(fill = colorcode, binwidth = 1000) + 
+  labs(title = 'Histogram of the total number of steps',
     x = "Number of steps per day", y = "Number of times in a day")
 ```
 
@@ -77,7 +89,9 @@ medianNumStepsDaily
 avgDailyActivity <- aggregate(steps~interval,data = data, FUN = mean, na.rm = TRUE)
 head(avgDailyActivity)
 ggplot(avgDailyActivity, aes(x = interval, y = steps)) +
-  geom_line(colour = colorcode) + labs(title = "Average daily activity pattern", x = "Interval", y = "Steps")
+  geom_line(colour = colorcode) + 
+  labs(title = "Average daily activity pattern", 
+       x = "Interval", y = "Steps")
 ```
 
 2. Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?
@@ -109,8 +123,15 @@ str(dataFilled)
 
 4. Make a histogram of the total number of steps taken each day and Calculate and report the **mean** and **median** total number of steps taken per day. Do these values differ from the estimates from the first part of the assignment? What is the impact of imputing missing data on the estimates of the total daily number of steps?
 ```{r}
-numStepsDailyFilled <- aggregate(steps ~ date, data = dataFilled, FUN = sum, na.rm = FALSE)
-ggplot(numStepsDailyFilled, aes(x = steps)) + geom_histogram(fill=colorcode, binwidth = 1000) +labs(title = "Histogram of the total number of steps", x = "Number of steps per day", y = "Number of times in a day")
+numStepsDailyFilled <- aggregate(steps ~ date, 
+                                 data = dataFilled, 
+                                 FUN = sum, 
+                                 na.rm = FALSE)
+
+ggplot(numStepsDailyFilled, aes(x = steps)) + 
+  geom_histogram(fill=colorcode, binwidth = 1000) + 
+  labs(title = "Histogram of the total number of steps", 
+       x = "Number of steps per day", y = "Number of times in a day")
 ```
 
 Now that the **NA**s are removed, we would assume some changes in **mean** and **median**:
@@ -142,7 +163,14 @@ head(dataNew)
   
 2. Make a panel plot containing a time series plot (i.e. **type = "l"**) of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all weekday days or weekend days (y-axis). See the README file in the GitHub repository to see an example of what this plot should look like using simulated data.
 ```{r}
-numStepsDailyNew <- aggregate(steps ~ interval, data = dataNew, FUN = mean, na.rm = TRUE)
-ggplot(dataNew, aes(x = interval, y = steps, color = dayType)) + geom_line() + labs(title = "Average daily steps", 
-x = "Interval", y = "Total number of steps") + facet_wrap(~dayType, ncol = 1, nrow = 2)
+numStepsDailyNew <- aggregate(steps ~ interval, 
+                              data = dataNew, 
+                              FUN = mean, 
+                              na.rm = TRUE)
+ggplot(dataNew, aes(x = interval, y = steps, color = dayType)) + 
+  geom_line() + 
+  labs(title = "Average daily steps", 
+       x = "Interval", 
+       y = "Total number of steps") + 
+  facet_wrap(~dayType, ncol = 1, nrow = 2)
 ```
