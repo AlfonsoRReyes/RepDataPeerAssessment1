@@ -23,20 +23,30 @@ dl = unzip(zipfile = "./data/Activity-monitoring-data.zip", exdir = "./data")
 dt.Raw = read.csv(dl)
 ```
 
+```{r}
+dl <- "../../inst/extdata/activity.csv"
+dt.Raw = read.csv(dl)
+```
+
+
 ## What is the Mean total numbers of steps taken per day?
 #### For this part of the assignment we're ignoring missing values in the dataset
 
 #### 1 - Calculating the total number of steps taken per day
 
 ```{r}
-dt.Steps = aggregate(list(Steps = dt.Raw$steps), by = list(Date = dt.Raw$date), FUN = sum, na.rm = TRUE)
+dt.Steps = aggregate(list(Steps = dt.Raw$steps), 
+                     by = list(Date = dt.Raw$date), 
+                     FUN = sum, na.rm = TRUE)
 
 dt.Steps
 ```
 
 ### 2 - Creating a Histogram of total number of steps taken each day
 ```{r}
-hist(dt.Steps$Steps, breaks = seq(0,25000, by = 2500), col = "lightgreen", main = "Frequency of Steps per Day", xlab = "Steps per Day (Groups of 2500)", ylab = "Frequency")
+hist(dt.Steps$Steps, breaks = seq(0,25000, by = 2500), 
+     col = "lightgreen", main = "Frequency of Steps per Day", 
+     xlab = "Steps per Day (Groups of 2500)", ylab = "Frequency")
 ```
 
 #### 3 - Calculating the mean & median number of steps per day
@@ -50,7 +60,8 @@ median(dt.Steps$Steps)
 #### For this part of the assignment we're continuing to ignore missing values in the dataset
 
 ```{r}
-dt.DailyActivityPattern = aggregate(list(Steps = dt.Raw$steps), by = list(Interval = dt.Raw$interval), FUN = mean, na.rm = TRUE)
+dt.DailyActivityPattern = aggregate(list(Steps = dt.Raw$steps), 
+                                    by = list(Interval = dt.Raw$interval), FUN = mean, na.rm = TRUE)
 ```
 
 #### 1 - Making a time series plot of the average steps taken in every 5-minute interval
@@ -77,7 +88,12 @@ sum(is.na(dt.Raw$steps))
 
 ```{r}
 dt.NA = is.na(dt.Raw$steps)
-dt.AvgInterval = tapply(dt.Raw$steps, dt.Raw$interval, mean, na.rm = TRUE, simplify = TRUE)
+
+dt.AvgInterval = tapply(dt.Raw$steps, 
+                        dt.Raw$interval, 
+                        mean, 
+                        na.rm = TRUE, 
+                        simplify = TRUE)
 dt.Imputed = dt.Raw
 dt.Imputed$steps[dt.NA] = dt.AvgInterval[as.character(dt.Imputed$interval[dt.NA])]
 ```
@@ -91,9 +107,15 @@ sum(is.na(dt.Imputed$steps))
 #### 4a - Creating a Histogram of total number of steps taken each day
 
 ```{r}
-dt.StepsImputed = aggregate(list(Steps = dt.Imputed$steps), by = list(Date = dt.Imputed$date), FUN = sum, na.rm = TRUE)
+dt.StepsImputed = aggregate(list(Steps = dt.Imputed$steps), 
+                            by = list(Date = dt.Imputed$date), 
+                            FUN = sum, na.rm = TRUE)
 
-hist(dt.StepsImputed$Steps, breaks = seq(0,25000, by = 2500), col = "lightgreen", main = "Frequency of Steps per Day", xlab = "Steps per Day (Groups of 2500)", ylab = "Frequency")
+hist(dt.StepsImputed$Steps, 
+     breaks = seq(0,25000, by = 2500), 
+     col = "lightgreen", 
+     main = "Frequency of Steps per Day", 
+     xlab = "Steps per Day (Groups of 2500)", ylab = "Frequency")
 ```
 
 #### 4b - Calculating the mean & median number of steps per day
