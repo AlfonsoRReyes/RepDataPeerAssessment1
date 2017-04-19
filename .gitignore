@@ -11,3 +11,7 @@ README.html
 packrat/lib*/
 
 packrat/
+
+PA1_template_files/figure-html/
+
+*.zip
