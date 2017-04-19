@@ -1,4 +1,5 @@
-.onLoad <- function(libname = find.package("RepDataPeerAssignment1"), pkgname = "RepDataPeerAssignment1"){
+.onLoad <- function(libname = find.package("RepDataPeerAssignment1"),
+                    pkgname = "RepDataPeerAssignment1"){
 
   # CRAN Note avoidance
   if(getRversion() >= "2.15.1")
