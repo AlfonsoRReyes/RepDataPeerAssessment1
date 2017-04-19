@@ -8,3 +8,6 @@ README.html
 /.project
 .directory
 *.nb.html
+packrat/lib*/
+
+packrat/

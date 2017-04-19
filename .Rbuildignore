@@ -3,3 +3,5 @@
 README.nb.html
 README.html
 README.Rmd
+^packrat/
+^\.Rprofile$
