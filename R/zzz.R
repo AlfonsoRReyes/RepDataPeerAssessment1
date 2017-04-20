@@ -1,11 +1,14 @@
 .onLoad <- function(libname = find.package("RepDataPeerAssignment1"),
                     pkgname = "RepDataPeerAssignment1"){
 
+  myEnv <- new.env(parent = baseenv())
+  project.data <- system.file("data", package = pkgname)
   # CRAN Note avoidance
   if(getRversion() >= "2.15.1")
     utils::globalVariables(
+      # project.data <- system.file("data", package = pkgname),
       # sample file names from taxstats
-      c("value", "Var1", "Var2",
+      c("value", "Var1", "Var2", "project.data", "activity", "myEnv",
 
         # we use the magrittr pipe
         ".",
