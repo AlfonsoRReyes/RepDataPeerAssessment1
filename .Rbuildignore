@@ -3,3 +3,6 @@
 README.nb.html
 README.html
 README.Rmd
+^packrat/
+^\.Rprofile$
+^PA1_template.*

@@ -12,4 +12,3 @@ nas.complete(x)
 \description{
 Get only non-NAs elements
 }
-

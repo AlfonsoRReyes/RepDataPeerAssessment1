@@ -12,4 +12,3 @@ nas.missing(x)
 \description{
 Get only NA elements
 }
-

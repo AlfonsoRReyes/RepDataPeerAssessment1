@@ -17,4 +17,3 @@ data(activity)
 Steps monitoring device data from 2012. date column converted from factor
 }
 \keyword{datasets}
-

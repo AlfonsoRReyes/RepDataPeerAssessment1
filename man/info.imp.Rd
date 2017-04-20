@@ -21,4 +21,3 @@ data frame with one column
 \description{
 It could be before or after imputation
 }
-

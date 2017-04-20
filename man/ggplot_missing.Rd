@@ -14,4 +14,3 @@ ggplot_missing(x)
 A function that plots missingness.
    Works only for dataframes with more than 1 variable
 }
-

@@ -8,6 +8,22 @@ output:
   html_notebook: default
 ---
 
+## Collection of functions used for Coursera assignment
+These function were produced during the development of the Assignment 1 on missing data. The more general applicable functions are located in the file `missing.R`.
+
+The tidy data files are located under ./data.
+
+We make use of the following packages:
+        magrittr,
+        ggplot2,
+        reshape2,
+        mice,
+        rprojroot,
+        imputeTS
+
+The package was not part of the assignment but rather a challenge to build myself skills.
+
+
 ## Development of Assignment
 
 The zip file in the instructions document is identical to the provided `activity.zip`. We will start by unzipping this file that I have moved to the folder `inst/extdata`.
