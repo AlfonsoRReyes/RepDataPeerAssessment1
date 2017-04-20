@@ -13,4 +13,3 @@ Intervals are the columns, steps are values. The date is rownames.
 Data frame of 61x288. The date as rownames.
 }
 \keyword{datasets}
-

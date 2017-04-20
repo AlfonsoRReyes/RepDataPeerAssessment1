@@ -15,4 +15,3 @@ None
 \description{
 Gets the number of NAs
 }
-

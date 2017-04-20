@@ -18,4 +18,3 @@ nas.plot.frequency(df, na.var, step = 30, ylim = 0)
 \description{
 Plot NAs variable vs frequency
 }
-
