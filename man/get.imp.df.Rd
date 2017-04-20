@@ -16,4 +16,3 @@ get.imp.df(x, mice.imp, uniVar)
 \description{
 Get a complete data frame including the imputed values
 }
-

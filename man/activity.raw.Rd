@@ -17,4 +17,3 @@ data(activity.raw)
 Steps monitoring device data from 2012 as read from CSV file
 }
 \keyword{datasets}
-
